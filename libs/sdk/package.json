@@ -1,0 +1,27 @@
+{
+    "name": "@hubts/event-reward-management-sdk",
+    "version": "0.0.1",
+    "description": "SDK for event-reward-management",
+    "author": "hubts",
+    "private": false,
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/hubts/event-reward-management.git"
+    },
+    "files": [
+        "dist"
+    ],
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
+    "scripts": {
+        "build": "tsc",
+        "prepublishOnly": "yarn build"
+    },
+    "devDependencies": {
+        "typescript": "^5.8.3"
+    }
+}

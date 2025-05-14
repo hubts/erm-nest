@@ -40,3 +40,6 @@ lerna-debug.log*
 # SDK
 libs/sdk/dist
 libs/sdk/node_modules
+
+# TOOLS
+tools/mongo/data

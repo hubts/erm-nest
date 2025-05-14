@@ -7,6 +7,15 @@
 
 # 이벤트 / 보상 관리 플랫폼 구축
 
+## Overview
+
+본 플랫폼은 이벤트/보상을 관리하는 시스템을 구축한 백엔드입니다.
+
+주요 달성 목표는 아래와 같습니다.
+
+1. 운영자 또는 관리자가 이벤트를 생성할 때, **이벤트 조건과 보상을 맞춤 설정**할 수 있어야 합니다.
+2. 유저가 보상을 요청할 때 **시스템은 해당 조건의 충족을 검사**하고, **설정에 따라 자동으로 보상을 지급**해야 합니다.
+
 ## Technical Stacks
 
 | Key             | Version / Tool         |
@@ -22,7 +31,7 @@
 
 ## Implementation Features
 
--   [ ] Git version management by `commitizen`
+-   [x] Git version management by `commitizen`
 -   [ ] Microservices
 -   [ ] Interfaces to generate SDK (Github Package)
 -   [ ] JWT Authentication
@@ -33,3 +42,11 @@
 -   [ ] Custom Logging System
 -   [ ] HealthChecker & Throttler
 -   [ ] CI with `Husky`
+
+## Domain
+
+### Gateway
+
+### Auth
+
+### Event

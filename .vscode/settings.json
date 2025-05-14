@@ -1,3 +1,12 @@
 {
-    "cSpell.words": ["premajor", "preminor", "prepatch"]
+    "cSpell.words": [
+        "ADMINPASSWORD",
+        "ADMINUSERNAME",
+        "BASICAUTH",
+        "INITDB",
+        "mongosh",
+        "premajor",
+        "preminor",
+        "prepatch"
+    ]
 }

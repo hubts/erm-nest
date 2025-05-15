@@ -1,7 +1,7 @@
 /**
  * Basic pagination options for query.
  */
-export interface PaginationOptions {
+export interface PaginationQuery {
     skip: number;
     take: number;
 }
@@ -19,7 +19,7 @@ export interface Paginated<T> {
  * Examples of type definition for pagination implementation.
  */
 export type FindManyAll<T> = () => Paginated<T>;
-export type FindManyPaginated<T> = (options: PaginationOptions) => Paginated<T>;
+export type FindManyPaginated<T> = (options: PaginationQuery) => Paginated<T>;
 export type FindManyPaginatedAndFiltered<T, R> = (
-    options: PaginationOptions & Partial<R>
+    options: PaginationQuery & Partial<R>
 ) => Paginated<T>;

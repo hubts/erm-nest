@@ -2,11 +2,15 @@
 import { NestFactory } from "@nestjs/core";
 import { AuthModule } from "./auth.module";
 import { ServerConfig } from "../config/server.config";
-import { setupSwagger } from "@app/common";
+import {
+    AllExceptionFilter,
+    CommonResponseDto,
+    CustomValidationPipe,
+    setupSwagger,
+} from "@app/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { SwaggerThemeNameEnum } from "swagger-themes";
 import { Logger } from "@nestjs/common";
-import * as path from "path";
 
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AuthModule, {
@@ -32,12 +36,21 @@ async function bootstrap() {
         setupSwagger(app, {
             path: swaggerPath,
             theme: SwaggerThemeNameEnum.FEELING_BLUE,
-            serverUrl: `${serverConfig.endpoint.external}/${serverConfig.endpoint.globalPrefix}`,
+            serverUrl: new URL(
+                serverConfig.endpoint.globalPrefix,
+                serverConfig.endpoint.external
+            ).toString(),
             title: applicationName,
             version: packageJson.version,
             description: "Documents to experience API",
-            extraModels: [],
+            extraModels: [CommonResponseDto],
         });
+
+        // Global pipe
+        app.useGlobalPipes(new CustomValidationPipe());
+
+        // Global filter
+        app.useGlobalFilters(new AllExceptionFilter());
 
         // API global prefix
         app.setGlobalPrefix(serverConfig.endpoint.globalPrefix);
@@ -50,13 +63,13 @@ async function bootstrap() {
             log += `< Information >\n`;
             log += `🌏 Env                 : ${serverConfig.env}\n`;
             log += `🌏 Application URL     : ${await app.getUrl()}\n`;
-            log += `🌏 External endpoint   : ${path.join(
-                serverConfig.endpoint.external,
-                serverConfig.endpoint.globalPrefix
+            log += `🌏 External endpoint   : ${new URL(
+                serverConfig.endpoint.globalPrefix,
+                serverConfig.endpoint.external
             )}\n`;
-            log += `🌏 Swagger document    : ${path.join(
-                serverConfig.endpoint.external,
-                serverConfig.docs.fullPath
+            log += `🌏 Swagger document    : ${new URL(
+                serverConfig.docs.fullPath,
+                serverConfig.endpoint.external
             )}\n`;
 
             logger.log(log);

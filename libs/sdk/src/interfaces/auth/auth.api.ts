@@ -1,10 +1,11 @@
-import { UserModel } from "../user";
+import { UserModel } from "./auth.model";
+import { ServiceToApi } from "@app/sdk";
 
 /**
  * 인증 API 인터페이스
  * @summary AuthService 구현 시 이용
  */
-export interface AuthApi<R = undefined> {
+export interface AuthApi<R extends UserModel | string | undefined = undefined> {
     // Register
     register(input: RegisterInput): Promise<void>;
     // Login
@@ -14,6 +15,8 @@ export interface AuthApi<R = undefined> {
     // Refresh Tokens
     refresh(input: RefreshInput): Promise<AuthToken>;
 }
+export type IAuthService = AuthApi<UserModel>;
+export type IAuthController = ServiceToApi<AuthApi<UserModel>>;
 
 // 회원가입 입력
 export interface RegisterInput

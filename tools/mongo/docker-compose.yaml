@@ -12,6 +12,10 @@ services:
             MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE} # MongoDB 데이터베이스 DB이름 (환경변수 연동)
         volumes:
             - ./${MONGO_VOLUME_DIR}:/data # MongoDB 데이터에 대한 외부 경로와 내부 경로를 연결
+            - ./init:/docker-entrypoint-initdb.d # 스크립트 전달
+        command: mongod --auth
+        env_file:
+            - .env
     mongo-express:
         image: mongo-express:latest # Mongo Express 버전
         container_name: ${MONGO_EXPRESS_CONTAINER_NAME} # 실행하는 컨테이너의 이름 (환경변수 연동)

@@ -1,10 +1,10 @@
-import { ApiRoute } from "@app/sdk/types";
+import { ApiRoute } from "@app/sdk";
 import { AuthApi } from "./auth.api";
 import { UserRole, UserRoles } from "./auth.model";
 
 /**
- * 인증 API 라우트 (최상위 인터페이스)
- * @summary AuthController(또는 Client 실제 호출 인터페이스) 구현 시 이용
+ * 인증 API Specification
+ * AuthController 또는 Client 실제 호출 서비스 구현 시 이용
  */
 export const AuthRoute: ApiRoute<AuthApi, UserRole> = {
     apiTags: "Authentication",

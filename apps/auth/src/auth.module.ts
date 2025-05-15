@@ -5,6 +5,8 @@ import { AuthService } from "./auth.service";
 import { CONFIGURATIONS } from "../config/configuration";
 import { MongooseModule } from "@nestjs/mongoose";
 import { MongooseConfigService } from "../config/mongoose.config.service";
+import { User, UserSchema } from "./schemas/user.schema";
+import { UserRepository } from "./repositories/user.repository";
 
 @Module({
     imports: [
@@ -16,8 +18,9 @@ import { MongooseConfigService } from "../config/mongoose.config.service";
         MongooseModule.forRootAsync({
             useClass: MongooseConfigService,
         }),
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     ],
     controllers: [AuthController],
-    providers: [AuthService],
+    providers: [AuthService, UserRepository],
 })
 export class AuthModule {}

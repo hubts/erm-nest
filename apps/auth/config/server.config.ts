@@ -6,6 +6,7 @@ import {
     NotEmptyEnum,
 } from "@app/common";
 import { Configuration } from "./configuration";
+import * as path from "path";
 
 export const ServerConfig = registerAs(
     "server",
@@ -21,7 +22,7 @@ export const ServerConfig = registerAs(
             },
             docs: {
                 path: config.DOCS_PATH,
-                fullPath: `/${config.GLOBAL_PREFIX}/${config.DOCS_PATH}`,
+                fullPath: path.join(config.GLOBAL_PREFIX, config.DOCS_PATH),
             },
         };
     }

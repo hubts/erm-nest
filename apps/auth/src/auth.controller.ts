@@ -25,6 +25,9 @@ export class AuthController implements IAuthController {
 
     @Route.Post(AuthRoute.register, {
         summary: "회원가입",
+        success: {
+            message: "회원가입에 성공하였습니다.",
+        },
     })
     async register(
         @Body() input: RegisterInputDto
@@ -35,6 +38,11 @@ export class AuthController implements IAuthController {
 
     @Route.Post(AuthRoute.login, {
         summary: "로그인",
+        success: {
+            message: "로그인에 성공하였습니다.",
+            description: "로그인 성공 시 접근/갱신 토큰이 반환됩니다.",
+            dataGenericType: AuthTokenDto,
+        },
     })
     async login(
         @Body() input: LoginInputDto
@@ -45,6 +53,9 @@ export class AuthController implements IAuthController {
 
     @Route.Post(AuthRoute.logout, {
         summary: "로그아웃",
+        success: {
+            message: "로그아웃에 성공하였습니다.",
+        },
     })
     async logout(
         @Requestor() requestor: UserModel
@@ -55,6 +66,11 @@ export class AuthController implements IAuthController {
 
     @Route.Post(AuthRoute.refresh, {
         summary: "토큰 갱신",
+        success: {
+            message: "토큰 갱신에 성공하였습니다.",
+            description: "토큰 갱신 성공 시 접근/갱신 토큰이 반환됩니다.",
+            dataGenericType: AuthTokenDto,
+        },
     })
     async refresh(
         @Body() input: RefreshInputDto

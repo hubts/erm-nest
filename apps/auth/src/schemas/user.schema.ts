@@ -38,6 +38,7 @@ export class User extends AbstractDocument {
     @Prop({
         required: false,
         type: {
+            lastLoginAt: Date,
             activatedAt: Date,
             deactivatedAt: Date,
             blockedAt: Date,
@@ -45,11 +46,18 @@ export class User extends AbstractDocument {
         },
     })
     checkpoint?: {
+        lastLoginAt: Date | null;
         activatedAt: Date | null;
         deactivatedAt: Date | null;
         blockedAt: Date | null;
         deletedAt: Date | null;
     };
+
+    @Prop({ required: false, default: Date.now })
+    createdAt?: Date;
+
+    @Prop({ required: false, default: Date.now })
+    updatedAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

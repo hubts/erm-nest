@@ -1,7 +1,6 @@
 import { HttpStatus, RequestMethod, Type } from "@nestjs/common";
 import { ApiExtraModels, ApiResponse, getSchemaPath } from "@nestjs/swagger";
 import { METHOD_METADATA } from "@nestjs/common/constants";
-import { CommonResponseDto } from "@app/common/dto";
 
 /**
  * Option interface of successful API response.
@@ -71,10 +70,10 @@ export const ApiResSuccess = (options: ApiResSuccessOptions) => {
                     schema: {
                         allOf: [
                             {
-                                $ref: getSchemaPath(CommonResponseDto),
-                            },
-                            {
                                 properties: {
+                                    success: {
+                                        example: true,
+                                    },
                                     message: {
                                         example: message,
                                     },

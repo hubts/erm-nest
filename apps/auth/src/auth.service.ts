@@ -6,43 +6,58 @@ import {
     RegisterInput,
     UserModel,
 } from "@app/sdk";
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { UserRepository } from "./repositories/user.repository";
-import { hashSync } from "bcrypt";
+import { Injectable } from "@nestjs/common";
+import { AuthUserService } from "./providers/auth-user.service";
+import { AuthTokenService } from "./providers/auth-token.service";
+
 @Injectable()
 export class AuthService implements IAuthService {
-    constructor(private readonly userRepo: UserRepository) {}
+    constructor(
+        private readonly userService: AuthUserService,
+        private readonly tokenService: AuthTokenService
+    ) {}
 
     // 회원가입
     async register(input: RegisterInput): Promise<void> {
         const { email, password, nickname } = input;
-
-        // Email 중복 체크
-        const existingUser = await this.userRepo.findOne({ email });
-        if (existingUser) {
-            throw new BadRequestException("이미 존재하는 이메일입니다.");
-        }
-
-        // 생성
-        await this.userRepo.create({
-            email,
-            password: hashSync(password, 10),
-            nickname,
-        });
+        await this.userService.assertDuplicateEmail(email);
+        await this.userService.createUser(email, password, nickname);
     }
 
     // 로그인
-    login(input: LoginInput): Promise<AuthToken> {
-        throw new Error("Method not implemented.");
+    async login(input: LoginInput): Promise<AuthToken> {
+        const { email, password } = input;
+        const user = await this.userService.getLoginUser(email, password);
+        const accessToken = this.tokenService.generateAccessToken(user);
+        const refreshToken = await this.tokenService.generateRefreshToken(user);
+        return {
+            accessToken,
+            refreshToken,
+        };
     }
 
     // 로그아웃
-    logout(requestor: UserModel): Promise<void> {
-        throw new Error("Method not implemented.");
+    async logout(requestor: UserModel): Promise<void> {
+        await this.tokenService.deleteRefreshTokens(requestor.id);
     }
 
     // 토큰 갱신
-    refresh(input: RefreshInput): Promise<AuthToken> {
-        throw new Error("Method not implemented.");
+    async refresh(input: RefreshInput): Promise<AuthToken> {
+        const { refreshToken } = input;
+        const userId = await this.tokenService.getUserIdByRefreshToken(
+            refreshToken
+        );
+        console.log(userId);
+        const user = await this.userService.findOneOrThrowById(userId);
+        console.log(user);
+        await this.tokenService.assertRefreshToken(refreshToken, {
+            id: user.id,
+            email: user.email,
+        });
+        const accessToken = this.tokenService.generateAccessToken(user);
+        const newRefreshToken = await this.tokenService.generateRefreshToken(
+            user
+        );
+        return { accessToken, refreshToken: newRefreshToken };
     }
 }

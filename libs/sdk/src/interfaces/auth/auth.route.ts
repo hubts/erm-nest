@@ -8,7 +8,7 @@ import { UserRole, UserRoles } from "./auth.model";
  */
 export const AuthRoute: ApiRoute<AuthApi, UserRole> = {
     apiTags: "Authentication",
-    pathPrefix: "/auth",
+    pathPrefix: "", // MSA 미사용
     register: {
         method: "POST",
         subRoute: "/register",

@@ -3,6 +3,7 @@ import {
     IAuthService,
     LoginInput,
     RefreshInput,
+    RegisterAsInput,
     RegisterInput,
     UserModel,
 } from "@app/sdk";
@@ -21,7 +22,11 @@ export class AuthService implements IAuthService {
     async register(input: RegisterInput): Promise<void> {
         const { email, password, nickname } = input;
         await this.userService.assertDuplicateEmail(email);
-        await this.userService.createUser(email, password, nickname);
+        await this.userService.createUser({
+            email,
+            password,
+            nickname,
+        });
     }
 
     // 로그인
@@ -59,5 +64,16 @@ export class AuthService implements IAuthService {
             user
         );
         return { accessToken, refreshToken: newRefreshToken };
+    }
+
+    // 특정 역할 회원가입
+    async registerAs(input: RegisterAsInput): Promise<void> {
+        const { email, password, role } = input;
+        await this.userService.assertDuplicateEmail(email);
+        await this.userService.createUser({
+            email,
+            password,
+            role,
+        });
     }
 }

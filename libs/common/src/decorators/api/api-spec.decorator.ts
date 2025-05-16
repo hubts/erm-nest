@@ -1,11 +1,12 @@
-import { Get, NotImplementedException, Post } from "@nestjs/common";
-import { ApiOperation } from "@nestjs/swagger";
+import { Get, NotImplementedException, Post, UseGuards } from "@nestjs/common";
+import { ApiBasicAuth, ApiOperation } from "@nestjs/swagger";
 import {
     ApiResSuccess,
     ApiResSuccessOptions,
 } from "./api-res-success.decorator";
 import { ApiRouteOptions, HttpMethod } from "@app/sdk";
 import { JwtRolesAuth } from "../auth";
+import { AdminSecretGuard } from "../../guards";
 
 /**
  * Option interface of API specification.
@@ -50,16 +51,18 @@ export const ApiSpec = <R>(
         summary,
         deprecated,
         success,
+        adminOnly,
     } = options;
     // const errors = options.errors ?? [];
-    const errors = [];
 
     return <T>(
         target: object,
         key: string | symbol,
         descriptor: TypedPropertyDescriptor<T>
     ) => {
-        // Set HTTP method.
+        /**
+         * HTTP Method
+         */
         let HttpMethod = Get;
         switch (method) {
             case "GET": {
@@ -76,15 +79,27 @@ export const ApiSpec = <R>(
         }
         HttpMethod(subRoute)(target, key, descriptor);
 
-        // Set JWT roles.
+        /**
+         * Set JWT roles
+         */
         JwtRolesAuth(roles)(target, key, descriptor);
-        if (roles?.length) {
-            // If roles(permissions) are required, set errors related to access.
-            // 401, 403
-            errors.push("UNAUTHORIZED", "FORBIDDEN_RESOURCE");
+        // if (roles?.length) {
+        //     // If roles(permissions) are required, set errors related to access.
+        //     // 401, 403
+        //     errors.push("UNAUTHORIZED", "FORBIDDEN_RESOURCE");
+        // }
+
+        /**
+         * Set Admin Secret Guard if adminOnly is true
+         */
+        if (adminOnly) {
+            UseGuards(AdminSecretGuard)(target, key, descriptor);
+            ApiBasicAuth()(target, key, descriptor);
         }
 
-        // Set API operation.
+        /**
+         * Set API operation
+         */
         ApiOperation({
             operationId: key.toString(),
             summary,
@@ -92,18 +107,20 @@ export const ApiSpec = <R>(
             deprecated: deprecated ?? false,
         })(target, key, descriptor);
 
-        // Set pre-defined success response.
+        /**
+         * Set pre-defined success response.
+         */
         if (success) {
             ApiResSuccess(success)(target, key, descriptor);
         }
 
         // Set default errors.
         // 400, 500, 503
-        errors.push(
-            "BAD_REQUEST",
-            "INTERNAL_SERVER_ERROR",
-            "SERVICE_UNAVAILABLE"
-        );
+        // errors.push(
+        //     "BAD_REQUEST",
+        //     "INTERNAL_SERVER_ERROR",
+        //     "SERVICE_UNAVAILABLE"
+        // );
         // Set pre-defined error responses.
         // if (errors?.length) {
         //     ApiResErrors(errors)(target, key, descriptor);

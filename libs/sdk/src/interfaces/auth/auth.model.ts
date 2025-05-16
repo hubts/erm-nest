@@ -8,7 +8,9 @@ export const UserRole = {
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 export const UserRoles = Object.values(UserRole);
 
-// 유저 모델
+/**
+ * 유저 모델
+ */
 export interface UserModel {
     id: string;
     email: string;

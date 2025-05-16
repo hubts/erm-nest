@@ -13,6 +13,7 @@ export type Configuration = {
         env: ServerEnv;
         port: number;
         isProduction: boolean;
+        adminSecret: string;
         endpoint: {
             external: string;
             globalPrefix: string;

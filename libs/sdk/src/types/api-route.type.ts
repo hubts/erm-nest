@@ -30,6 +30,12 @@ export interface ApiRouteOptions<R> {
      * @example ["이벤트를 생성합니다.", "관리자 권한이 필요합니다."]
      */
     description: string[];
+    /**
+     * 관리자 전용 API 여부 (역할 Admin 아님)
+     * 관리자 페이지 등 Secret 값을 요구하는 non-permission API 등에 적용하는 옵션)
+     * @default false
+     */
+    adminOnly?: boolean;
 }
 
 /**

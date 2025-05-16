@@ -3,11 +3,11 @@ import {
     Injectable,
     NotFoundException,
 } from "@nestjs/common";
-import { UserRepository } from "../repositories/user.repository";
-import { User } from "../schemas/user.schema";
 import { hashSync, compareSync } from "bcrypt";
-import { UserModel } from "@app/sdk";
-import { mappingUser } from "../mapper/user.mapper";
+import { UserModel, UserRole } from "@app/sdk";
+import { faker } from "@faker-js/faker";
+import { UserRepository } from "../repositories/user.repository";
+import { UserMapper } from "../mapper/user.mapper";
 
 @Injectable()
 export class AuthUserService {
@@ -25,19 +25,24 @@ export class AuthUserService {
         if (!user) {
             throw new NotFoundException("존재하지 않는 이메일입니다.");
         }
-        return mappingUser(user);
+        return UserMapper.toModel(user);
     }
 
-    async createUser(
-        email: string,
-        password: string,
-        nickname: string
-    ): Promise<User> {
-        return this.userRepo.create({
+    async createUser(data: {
+        email: string;
+        password: string;
+        role?: UserRole;
+        nickname?: string;
+    }): Promise<UserModel> {
+        const { email, password, role, nickname } = data;
+        const user = await this.userRepo.create({
             email,
             password: hashSync(password, 10),
-            nickname,
+            nickname:
+                nickname ?? `${role ?? UserRole.USER}-${faker.string.uuid()}`,
+            ...(role && { role }),
         });
+        return UserMapper.toModel(user);
     }
 
     async getLoginUser(email: string, password: string): Promise<UserModel> {
@@ -55,7 +60,7 @@ export class AuthUserService {
         if (!user) {
             throw new NotFoundException("존재하지 않는 토큰입니다.");
         }
-        return mappingUser(user);
+        return UserMapper.toModel(user);
     }
 
     async findOneOrThrowById(id: string): Promise<UserModel> {
@@ -63,6 +68,6 @@ export class AuthUserService {
         if (!user) {
             throw new NotFoundException("존재하지 않는 유저입니다.");
         }
-        return mappingUser(user);
+        return UserMapper.toModel(user);
     }
 }

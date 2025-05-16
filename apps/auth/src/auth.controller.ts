@@ -1,7 +1,7 @@
 import { Body, Controller } from "@nestjs/common";
+import { ApiTags } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { AuthRoute, IAuthController, UserModel } from "@app/sdk";
-import { ApiTags } from "@nestjs/swagger";
 import {
     asSuccessResponse,
     CommonResponseDto,
@@ -12,6 +12,7 @@ import { RegisterInputDto } from "./dto/body/register-input.dto";
 import { LoginInputDto } from "./dto/body/login-input.dto";
 import { AuthTokenDto } from "./dto/response/auth-token.dto";
 import { RefreshInputDto } from "./dto/body/refresh-input.dto";
+import { RegisterAsInputDto } from "./dto/body/register-as-input.dto";
 
 @ApiTags(AuthRoute.apiTags)
 @Controller()
@@ -77,5 +78,18 @@ export class AuthController implements IAuthController {
     ): Promise<CommonResponseDto<AuthTokenDto>> {
         const result = await this.authService.refresh(input);
         return asSuccessResponse("토큰 갱신에 성공", result);
+    }
+
+    @Route.Post(AuthRoute.registerAs, {
+        summary: "특정 역할 회원가입",
+        success: {
+            message: "특정 역할 회원가입에 성공하였습니다.",
+        },
+    })
+    async registerAs(
+        @Body() input: RegisterAsInputDto
+    ): Promise<CommonResponseDto<void>> {
+        await this.authService.registerAs(input);
+        return asSuccessResponse("특정 역할 회원가입에 성공");
     }
 }

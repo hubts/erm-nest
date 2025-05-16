@@ -16,6 +16,7 @@ export const ServerConfig = registerAs(
             env: config.ENV,
             port: config.PORT,
             isProduction: config.ENV === ServerEnv.PRODUCTION,
+            adminSecret: config.ADMIN_SECRET,
             endpoint: {
                 external: config.EXTERNAL_ENDPOINT,
                 globalPrefix: config.GLOBAL_PREFIX,
@@ -53,4 +54,7 @@ class ServerConfigValidation {
 
     @NotEmptyString()
     DOCS_PATH: string;
+
+    @NotEmptyString()
+    ADMIN_SECRET: string;
 }

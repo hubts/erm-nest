@@ -33,4 +33,11 @@ export const AuthRoute: ApiRoute<AuthApi, UserRole> = {
         roles: [],
         description: ["토큰 갱신"],
     },
+    registerAs: {
+        method: "POST",
+        subRoute: "/register-as",
+        roles: [],
+        adminOnly: true,
+        description: ["특정 역할 회원가입"],
+    },
 };

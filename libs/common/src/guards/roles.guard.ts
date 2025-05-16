@@ -23,6 +23,7 @@ export class RolesGuard implements CanActivate {
             "roles",
             context.getHandler()
         );
+        // If no roles are defined, allow access (but need JWT)
         if (!roles.length) {
             return true;
         }
@@ -34,6 +35,7 @@ export class RolesGuard implements CanActivate {
         /**
          * Check
          */
+
         const request: Request & {
             user: UserModel;
         } = context.switchToHttp().getRequest();
@@ -43,6 +45,11 @@ export class RolesGuard implements CanActivate {
             // However, this guard is called after the extracting.
             // Then, this condition may not be needed.
             throw new UnauthorizedException("Unauthorized");
+        }
+
+        // Admin can access all resources
+        if (user.role === UserRole.ADMIN) {
+            return true;
         }
 
         /**

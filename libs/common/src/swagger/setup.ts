@@ -39,6 +39,11 @@ export function setupSwagger(
         type: "http",
         bearerFormat: "JWT",
     });
+    swaggerConfig.addBasicAuth({
+        type: "apiKey",
+        in: "header",
+        name: "secret",
+    });
     const swaggerDocument = SwaggerModule.createDocument(
         app,
         swaggerConfig.build(),

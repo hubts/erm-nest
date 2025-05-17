@@ -49,6 +49,8 @@ export interface EventConditionModel {
     fieldName: string;
     displayName: string;
     type: "string" | "number" | "date";
+    createdAt: Date;
+    createdBy: string;
 }
 
 // 이벤트 조건 연산자
@@ -78,7 +80,7 @@ export interface EventRewardRequestModel {
     updatedAt: Date;
     eventId: string;
     userId: string;
-    status: "pending" | "approved" | "rejected";
+    status: "pending" | "insufficient" | "approved" | "rejected";
     reason?: string;
     determinedAt: Date;
     determinedBy: string;

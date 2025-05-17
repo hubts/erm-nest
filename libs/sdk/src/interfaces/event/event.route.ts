@@ -32,6 +32,18 @@ export const EventRoute: ApiRoute<EventApi, UserRole> = {
         roles: [],
         description: ["이벤트 목록 조회"],
     },
+    createEventCondition: {
+        method: "POST",
+        subRoute: "/conditions",
+        roles: [UserRole.OPERATOR],
+        description: ["이벤트 조건 생성"],
+    },
+    findAllEventConditions: {
+        method: "GET",
+        subRoute: "/conditions",
+        roles: [UserRole.OPERATOR],
+        description: ["이벤트 조건 목록 조회"],
+    },
     settingRewards: {
         method: "POST",
         subRoute: "/:id/rewards",
@@ -67,5 +79,17 @@ export const EventRoute: ApiRoute<EventApi, UserRole> = {
         subRoute: "/:id/reward-requests",
         roles: [UserRole.USER, UserRole.OPERATOR, UserRole.AUDITOR],
         description: ["이벤트 보상 요청 목록 조회"],
+    },
+    createEventUserLogging: {
+        method: "POST",
+        subRoute: "/user-loggings",
+        roles: [UserRole.USER, UserRole.OPERATOR],
+        description: ["이벤트 사용자 로깅 생성"],
+    },
+    findAllEventUserLoggings: {
+        method: "GET",
+        subRoute: "/user-loggings",
+        roles: [UserRole.USER, UserRole.OPERATOR, UserRole.AUDITOR],
+        description: ["이벤트 사용자 로깅 목록 조회"],
     },
 };

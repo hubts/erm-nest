@@ -1,19 +1,19 @@
-import { Module } from "@nestjs/common";
+import { APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
+import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { MongooseModule } from "@nestjs/mongoose";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
-import { CONFIGURATIONS } from "../config/configuration";
-import { MongooseModule } from "@nestjs/mongoose";
-import { MongooseConfigService } from "../config/mongoose.config.service";
-import { User, UserSchema } from "./schemas/user.schema";
-import { UserRepository } from "./repositories/user.repository";
-import { AuthTokenService } from "./providers/auth-token.service";
-import { AuthUserService } from "./providers/auth-user.service";
 import { JwtModule } from "@nestjs/jwt";
-import { JwtConfigService } from "../config/jwt.config.service";
-import { Token, TokenSchema } from "./schemas/token.schema";
-import { TokenRepository } from "./repositories/token.repository";
-import { JwtStrategy } from "./providers/jwt.strategy";
+import { CustomValidationPipe, DefaultIfEmptyInterceptor } from "@app/common";
+import {
+    CONFIGURATIONS,
+    MongooseConfigService,
+    JwtConfigService,
+} from "../config";
+import { AuthUserService, AuthTokenService } from "./providers";
+import { UserRepository, TokenRepository } from "./repositories";
+import { User, UserSchema, Token, TokenSchema } from "./schemas";
 
 @Module({
     imports: [
@@ -35,12 +35,20 @@ import { JwtStrategy } from "./providers/jwt.strategy";
     ],
     controllers: [AuthController],
     providers: [
-        JwtStrategy,
         AuthService,
         UserRepository,
         AuthUserService,
         AuthTokenService,
         TokenRepository,
+        Logger,
+        {
+            provide: APP_PIPE,
+            useClass: CustomValidationPipe,
+        },
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: DefaultIfEmptyInterceptor,
+        },
     ],
 })
 export class AuthModule {}

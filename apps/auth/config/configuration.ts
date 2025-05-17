@@ -11,6 +11,7 @@ export const CONFIGURATIONS = [ServerConfig, JwtConfig, MongooseConfig];
 export type Configuration = {
     Server: {
         env: ServerEnv;
+        host: string;
         port: number;
         isProduction: boolean;
         adminSecret: string;

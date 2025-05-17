@@ -1,6 +1,7 @@
 import { FilterQuery, Model, SaveOptions, Types, UpdateQuery } from "mongoose";
 import { AbstractDocument } from "./abstract.document";
-import { NotFoundException } from "@nestjs/common";
+import { HttpStatus } from "@nestjs/common";
+import { RpcException } from "@nestjs/microservices";
 
 export abstract class AbstractRepository<T extends AbstractDocument> {
     constructor(protected readonly model: Model<T>) {}
@@ -21,7 +22,10 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
     async findOneOrThrow(filterQuery: FilterQuery<T>): Promise<T> {
         const document = await this.findOne(filterQuery);
         if (!document) {
-            throw new NotFoundException("Document not found.");
+            throw new RpcException({
+                statusCode: HttpStatus.NOT_FOUND,
+                message: "도큐먼트가 존재하지 않습니다.",
+            });
         }
         return document;
     }

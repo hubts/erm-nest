@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import {
     AuthToken,
     IAuthService,
@@ -7,9 +8,7 @@ import {
     RegisterInput,
     UserModel,
 } from "@app/sdk";
-import { Injectable } from "@nestjs/common";
-import { AuthUserService } from "./providers/auth-user.service";
-import { AuthTokenService } from "./providers/auth-token.service";
+import { AuthUserService, AuthTokenService } from "./providers";
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -42,8 +41,8 @@ export class AuthService implements IAuthService {
     }
 
     // 로그아웃
-    async logout(requestor: UserModel): Promise<void> {
-        await this.tokenService.deleteRefreshTokens(requestor.id);
+    async logout(user: UserModel): Promise<void> {
+        await this.tokenService.deleteRefreshTokens(user.id);
     }
 
     // 토큰 갱신
@@ -52,9 +51,7 @@ export class AuthService implements IAuthService {
         const userId = await this.tokenService.getUserIdByRefreshToken(
             refreshToken
         );
-        console.log(userId);
         const user = await this.userService.findOneOrThrowById(userId);
-        console.log(user);
         await this.tokenService.assertRefreshToken(refreshToken, {
             id: user.id,
             email: user.email,
@@ -75,5 +72,10 @@ export class AuthService implements IAuthService {
             password,
             role,
         });
+    }
+
+    // 인증된 유저 조회
+    async getAuthorizedUser(id: string): Promise<UserModel> {
+        return await this.userService.findOneOrThrowById(id);
     }
 }

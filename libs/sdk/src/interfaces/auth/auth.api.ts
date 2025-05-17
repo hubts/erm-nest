@@ -16,6 +16,8 @@ export interface AuthApi<R extends UserModel | string | undefined = undefined> {
     refresh(input: RefreshInput): Promise<AuthToken>;
     // Register as special role
     registerAs(input: RegisterAsInput): Promise<void>;
+    // Get authorized user
+    getAuthorizedUser(id: string): Promise<UserModel>;
 }
 export type IAuthService = AuthApi<UserModel>;
 export type IAuthController = ServiceToApi<AuthApi<UserModel>>;

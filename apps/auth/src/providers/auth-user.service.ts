@@ -1,13 +1,10 @@
-import {
-    BadRequestException,
-    Injectable,
-    NotFoundException,
-} from "@nestjs/common";
+import { HttpStatus, Injectable } from "@nestjs/common";
 import { hashSync, compareSync } from "bcrypt";
 import { UserModel, UserRole } from "@app/sdk";
 import { faker } from "@faker-js/faker";
 import { UserRepository } from "../repositories/user.repository";
 import { UserMapper } from "../mapper/user.mapper";
+import { RpcException } from "@nestjs/microservices";
 
 @Injectable()
 export class AuthUserService {
@@ -16,14 +13,20 @@ export class AuthUserService {
     async assertDuplicateEmail(email: string): Promise<void> {
         const user = await this.userRepo.findOne({ email });
         if (user) {
-            throw new BadRequestException("이미 존재하는 이메일입니다.");
+            throw new RpcException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: "이미 존재하는 이메일입니다.",
+            });
         }
     }
 
     async findOneOrThrowByEmail(email: string): Promise<UserModel> {
         const user = await this.userRepo.findOne({ email });
         if (!user) {
-            throw new NotFoundException("존재하지 않는 이메일입니다.");
+            throw new RpcException({
+                statusCode: HttpStatus.NOT_FOUND,
+                message: "존재하지 않는 이메일입니다.",
+            });
         }
         return UserMapper.toModel(user);
     }
@@ -48,7 +51,10 @@ export class AuthUserService {
     async getLoginUser(email: string, password: string): Promise<UserModel> {
         const user = await this.findOneOrThrowByEmail(email);
         if (!compareSync(password, user.password)) {
-            throw new BadRequestException("비밀번호가 일치하지 않습니다.");
+            throw new RpcException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: "비밀번호가 일치하지 않습니다.",
+            });
         }
         return user;
     }
@@ -58,7 +64,10 @@ export class AuthUserService {
     ): Promise<UserModel> {
         const user = await this.userRepo.findOne({ refreshToken });
         if (!user) {
-            throw new NotFoundException("존재하지 않는 토큰입니다.");
+            throw new RpcException({
+                statusCode: HttpStatus.NOT_FOUND,
+                message: "존재하지 않는 토큰입니다.",
+            });
         }
         return UserMapper.toModel(user);
     }
@@ -66,7 +75,10 @@ export class AuthUserService {
     async findOneOrThrowById(id: string): Promise<UserModel> {
         const user = await this.userRepo.findOne({ _id: id });
         if (!user) {
-            throw new NotFoundException("존재하지 않는 유저입니다.");
+            throw new RpcException({
+                statusCode: HttpStatus.NOT_FOUND,
+                message: "존재하지 않는 유저입니다.",
+            });
         }
         return UserMapper.toModel(user);
     }

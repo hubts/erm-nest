@@ -36,6 +36,11 @@ export interface ApiRouteOptions<R> {
      * @default false
      */
     adminOnly?: boolean;
+    /**
+     * Microservice 메시지 패턴
+     * @example "auth.register"
+     */
+    cmd?: string;
 }
 
 /**

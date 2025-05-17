@@ -1,15 +1,11 @@
-import {
-    BadRequestException,
-    Inject,
-    Injectable,
-    UnauthorizedException,
-} from "@nestjs/common";
+import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { compareSync, hashSync } from "bcrypt";
 import { JwtPayload, UserModel } from "@app/sdk";
 import { TokenRepository } from "../repositories/token.repository";
 import { JwtConfig } from "apps/auth/config/jwt.config";
 import { ConfigType } from "@nestjs/config";
+import { RpcException } from "@nestjs/microservices";
 
 @Injectable()
 export class AuthTokenService {
@@ -54,7 +50,10 @@ export class AuthTokenService {
     ): Promise<void> {
         const { hash } = this.jwtService.verify(refreshToken);
         if (!compareSync(JSON.stringify(payload), hash)) {
-            throw new BadRequestException("잘못된 갱신 토큰입니다.");
+            throw new RpcException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: "잘못된 토큰입니다.",
+            });
         }
     }
 
@@ -65,11 +64,17 @@ export class AuthTokenService {
     async getUserIdByRefreshToken(refreshToken: string): Promise<string> {
         const token = await this.tokenRepo.findOne({ token: refreshToken });
         if (!token) {
-            throw new UnauthorizedException("잘못된 갱신 토큰입니다.");
+            throw new RpcException({
+                statusCode: HttpStatus.NOT_FOUND,
+                message: "존재하지 않는 갱신 토큰입니다.",
+            });
         }
         if (token.expiresAt.getTime() < new Date().getTime()) {
             await this.tokenRepo.deleteOne({ token: refreshToken });
-            throw new BadRequestException("만료된 갱신 토큰입니다.");
+            throw new RpcException({
+                statusCode: HttpStatus.NOT_FOUND,
+                message: "만료된 갱신 토큰입니다.",
+            });
         }
         return token.userId;
     }

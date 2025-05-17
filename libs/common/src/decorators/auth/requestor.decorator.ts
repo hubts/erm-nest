@@ -14,7 +14,9 @@ export const Requestor = createParamDecorator(
             user?: UserModel;
         };
         if (!request.user) {
-            throw new UnauthorizedException("Unauthorized user");
+            throw new UnauthorizedException(
+                "인증된 사용자가 제대로 추출되지 않았습니다."
+            );
         }
         return request.user;
     }

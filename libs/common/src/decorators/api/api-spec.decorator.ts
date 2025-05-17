@@ -1,4 +1,12 @@
-import { Get, NotImplementedException, Post, UseGuards } from "@nestjs/common";
+import {
+    Delete,
+    Get,
+    NotImplementedException,
+    Patch,
+    Post,
+    Put,
+    UseGuards,
+} from "@nestjs/common";
 import { ApiBasicAuth, ApiOperation } from "@nestjs/swagger";
 import {
     ApiResSuccess,
@@ -74,6 +82,18 @@ export const ApiSpec = <R>(
             }
             case "POST": {
                 HttpMethod = Post;
+                break;
+            }
+            case "PUT": {
+                HttpMethod = Put;
+                break;
+            }
+            case "PATCH": {
+                HttpMethod = Patch;
+                break;
+            }
+            case "DELETE": {
+                HttpMethod = Delete;
                 break;
             }
             default: {

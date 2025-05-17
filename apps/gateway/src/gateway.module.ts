@@ -1,28 +1,47 @@
-import { Module } from "@nestjs/common";
-import { GatewayController } from "./gateway.controller";
-import { GatewayService } from "./gateway.service";
-import { APP_INTERCEPTOR } from "@nestjs/core";
-import { UserContextInterceptor } from "./user-context.interceptor";
-import { HttpModule } from "@nestjs/axios";
+import { Logger, Module } from "@nestjs/common";
+import { APP_FILTER, APP_PIPE } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { CONFIGURATIONS } from "../config/configuration";
+import { ClientsModule } from "@nestjs/microservices";
+import { AUTH_SERVICE, EVENT_SERVICE } from "./gateway.constants";
+import { AuthServiceConfigService } from "../config/microservices/auth-service.config.service";
+import { EventServiceConfigService } from "../config/microservices/event-service.config.service";
+import { AllExceptionFilter, CustomValidationPipe } from "@app/common";
+import { EventController } from "./microservices/event.controller";
+import { AuthController } from "./microservices/auth.controller";
+import { JwtStrategy } from "./auth/jwt.strategy";
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
             load: CONFIGURATIONS,
+            envFilePath: ["./apps/gateway/.env"],
         }),
-        HttpModule.register({
-            timeout: 10000,
+        ClientsModule.registerAsync({
+            clients: [
+                {
+                    name: AUTH_SERVICE,
+                    useClass: AuthServiceConfigService,
+                },
+                {
+                    name: EVENT_SERVICE,
+                    useClass: EventServiceConfigService,
+                },
+            ],
         }),
     ],
-    controllers: [GatewayController],
+    controllers: [AuthController, EventController],
     providers: [
-        GatewayService,
+        JwtStrategy,
+        Logger,
         {
-            provide: APP_INTERCEPTOR,
-            useClass: UserContextInterceptor,
+            provide: APP_FILTER,
+            useClass: AllExceptionFilter,
+        },
+        {
+            provide: APP_PIPE,
+            useClass: CustomValidationPipe,
         },
     ],
 })

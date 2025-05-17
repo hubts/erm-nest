@@ -14,6 +14,7 @@ export const ServerConfig = registerAs(
         const config = new ServerConfigValidation();
         return {
             env: config.ENV,
+            host: config.HOST,
             port: config.PORT,
             isProduction: config.ENV === ServerEnv.PRODUCTION,
             adminSecret: config.ADMIN_SECRET,
@@ -42,6 +43,9 @@ export type ServerEnv = (typeof ServerEnv)[keyof typeof ServerEnv];
 class ServerConfigValidation {
     @NotEmptyEnum(ServerEnv)
     ENV: ServerEnv;
+
+    @NotEmptyString()
+    HOST: string;
 
     @NotEmptyIntRange(0, 65535)
     PORT: number;

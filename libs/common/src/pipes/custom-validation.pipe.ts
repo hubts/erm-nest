@@ -39,7 +39,7 @@ export class CustomValidationPipe extends ValidationPipe {
                 messages: string[];
             }[] = [];
             this.searchErrorConstraints(errors, records);
-            throw new BadRequestException("Payload validation failed", {
+            throw new BadRequestException("잘못된 요청입니다.", {
                 cause: records,
             });
         }

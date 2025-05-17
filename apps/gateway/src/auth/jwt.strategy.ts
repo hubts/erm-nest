@@ -3,8 +3,10 @@ import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigType } from "@nestjs/config";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { JwtConfig } from "apps/auth/config/jwt.config";
-import { AuthUserService } from "./auth-user.service";
-import { JwtPayload, UserModel } from "@app/sdk";
+import { AuthRoute, JwtPayload } from "@app/sdk";
+import { AUTH_SERVICE } from "../gateway.constants";
+import { ClientProxy } from "@nestjs/microservices";
+import { firstValueFrom } from "rxjs";
 
 /**
  * Define a validation strategy for 'JwtAuthGuard'.
@@ -23,7 +25,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
         @Inject(JwtConfig.KEY)
         jwtConfig: ConfigType<typeof JwtConfig>,
-        private readonly userService: AuthUserService
+        @Inject(AUTH_SERVICE)
+        private readonly authClient: ClientProxy
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -32,16 +35,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(payload: JwtPayload): Promise<UserModel> {
+    async validate(payload: JwtPayload): Promise<JwtPayload> {
         const { id, role } = payload;
 
         // Check if the payload is valid
         if (!id || !role) {
-            throw new UnauthorizedException("Invalid JWT payload");
+            throw new UnauthorizedException("올바르지 않은 토큰입니다.");
         }
 
-        // Check if the user exists
-        const user = await this.userService.findOneOrThrowById(id);
+        // User check
+        const user = await firstValueFrom(
+            this.authClient.send(AuthRoute.getAuthorizedUser.cmd, id)
+        );
+        if (!user) {
+            throw new UnauthorizedException("존재하지 않는 유저입니다.");
+        }
 
         return user;
     }

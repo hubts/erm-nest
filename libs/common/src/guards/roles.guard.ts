@@ -44,7 +44,9 @@ export class RolesGuard implements CanActivate {
             // This error occurs when JWT was not extracted.
             // However, this guard is called after the extracting.
             // Then, this condition may not be needed.
-            throw new UnauthorizedException("Unauthorized");
+            throw new UnauthorizedException(
+                "권한이 제대로 추출되지 않았습니다."
+            );
         }
 
         // Admin can access all resources

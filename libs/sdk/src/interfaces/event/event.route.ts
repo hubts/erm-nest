@@ -7,7 +7,7 @@ import { EventApi } from "./event.api";
  */
 export const EventRoute: ApiRoute<EventApi, UserRole> = {
     apiTags: "Event",
-    pathPrefix: "", // MSA 미사용
+    pathPrefix: "events",
     create: {
         method: "POST",
         subRoute: "/create",

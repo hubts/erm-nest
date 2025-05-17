@@ -15,8 +15,6 @@ export interface EventModel {
     endedAt: Date;
     condition: EventConditionGroup;
     rewardDistributionType: "manual" | "auto";
-    rewards: EventRewardModel[];
-    rewardRequests: EventRewardRequestModel[];
 }
 
 // 이벤트 조건 그룹
@@ -35,7 +33,7 @@ export type LogicalOperator =
 
 // 이벤트 조건 세트
 export interface EventConditionSet {
-    leftOperand: EventConditionModel;
+    leftOperand: Pick<EventConditionModel, "id">;
     operator: EventConditionOperator;
     rightOperand: string | number | Date;
 }

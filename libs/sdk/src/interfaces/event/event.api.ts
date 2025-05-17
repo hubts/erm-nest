@@ -99,7 +99,6 @@ export interface CreateEventInput
         | "endedAt"
         | "condition"
         | "rewardDistributionType"
-        | "rewards"
     > {}
 
 // 이벤트 업데이트 입력

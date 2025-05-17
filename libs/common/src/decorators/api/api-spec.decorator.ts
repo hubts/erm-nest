@@ -14,6 +14,7 @@ import { AdminSecretGuard } from "../../guards";
  * @param summary - Summary of the API.
  * @param method - HTTP method of the API (optional).
  * @param deprecated - Whether the API is deprecated (optional).
+ * @param passThrough - Whether the API is pass through (no permission check) (optional).
  * @param success - Options for the successful API response (optional).
  * @param errors - Error names for the API response (optional).
  */
@@ -21,6 +22,7 @@ export interface ApiSpecOptions {
     summary: string;
     method?: HttpMethod;
     deprecated?: boolean;
+    passThrough?: boolean;
     success?: ApiResSuccessOptions;
     // errors?: ErrorName[];
 }
@@ -52,6 +54,7 @@ export const ApiSpec = <R>(
         deprecated,
         success,
         adminOnly,
+        passThrough,
     } = options;
     // const errors = options.errors ?? [];
 
@@ -82,7 +85,9 @@ export const ApiSpec = <R>(
         /**
          * Set JWT roles
          */
-        JwtRolesAuth(roles)(target, key, descriptor);
+        if (!passThrough) {
+            JwtRolesAuth(roles)(target, key, descriptor);
+        }
         // if (roles?.length) {
         //     // If roles(permissions) are required, set errors related to access.
         //     // 401, 403
@@ -92,7 +97,7 @@ export const ApiSpec = <R>(
         /**
          * Set Admin Secret Guard if adminOnly is true
          */
-        if (adminOnly) {
+        if (adminOnly && !passThrough) {
             UseGuards(AdminSecretGuard)(target, key, descriptor);
             ApiBasicAuth()(target, key, descriptor);
         }

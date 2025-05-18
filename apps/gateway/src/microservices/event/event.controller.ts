@@ -1,11 +1,4 @@
-import {
-    Body,
-    Controller,
-    Inject,
-    Param,
-    ParseUUIDPipe,
-    Query,
-} from "@nestjs/common";
+import { Body, Controller, Inject, Param, Query } from "@nestjs/common";
 import {
     EventRoute,
     EventConditionModel,
@@ -25,13 +18,12 @@ import {
 } from "@app/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { firstValueFrom } from "rxjs";
-import { EVENT_SERVICE } from "../../gateway.constants";
+import { EVENT_SERVICE } from "../../common/constants";
 import {
     CreateEventConditionInputDto,
     CreateEventInputDto,
     CreateEventUserLoggingInputDto,
     RejectRewardRequestInputDto,
-    SettingRewardsInputDto,
     UpdateEventInputDto,
 } from "./dto/body";
 import {
@@ -62,12 +54,12 @@ export class EventController implements IEventController {
         return asSuccessResponse("이벤트 생성 성공");
     }
 
-    @Route.Put(EventRoute.update, {
+    @Route.Patch(EventRoute.update, {
         summary: "이벤트 수정",
     })
     async update(
         @Requestor() requestor: UserModel,
-        @Param("id", ParseUUIDPipe) id: string,
+        @Param("id") id: string,
         @Body() input: UpdateEventInputDto
     ): Promise<CommonResponseDto> {
         await firstValueFrom(
@@ -76,30 +68,28 @@ export class EventController implements IEventController {
         return asSuccessResponse("이벤트 수정 성공");
     }
 
-    @Route.Get(EventRoute.findOne, {
-        summary: "이벤트 상세 조회",
-    })
-    async findOne(
-        @Requestor() requestor: UserModel,
-        @Param("id", ParseUUIDPipe) id: string
-    ): Promise<CommonResponseDto<EventModel>> {
-        const result = await firstValueFrom(
-            this.eventClient.send(EventRoute.findOne.cmd, [requestor, id])
-        );
-        return asSuccessResponse("이벤트 상세 조회 성공", result);
-    }
-
     @Route.Get(EventRoute.findAll, {
         summary: "이벤트 목록 조회",
     })
     async findAll(
-        @Requestor() requestor: UserModel,
         @Query() query: FindAllEventsQueryDto
     ): Promise<CommonResponseDto<EventModel[]>> {
         const result = await firstValueFrom(
-            this.eventClient.send(EventRoute.findAll.cmd, [requestor, query])
+            this.eventClient.send(EventRoute.findAll.cmd, [query])
         );
         return asSuccessResponse("이벤트 목록 조회 성공", result);
+    }
+
+    @Route.Get(EventRoute.findOne, {
+        summary: "이벤트 상세 조회",
+    })
+    async findOne(
+        @Param("id") id: string
+    ): Promise<CommonResponseDto<EventModel>> {
+        const result = await firstValueFrom(
+            this.eventClient.send(EventRoute.findOne.cmd, [id])
+        );
+        return asSuccessResponse("이벤트 상세 조회 성공", result);
     }
 
     @Route.Post(EventRoute.createEventCondition, {
@@ -134,30 +124,12 @@ export class EventController implements IEventController {
         return asSuccessResponse("이벤트 조건 목록 조회 성공", result);
     }
 
-    @Route.Post(EventRoute.settingRewards, {
-        summary: "이벤트 보상 설정",
-    })
-    async settingRewards(
-        @Requestor() requestor: UserModel,
-        @Param("id", ParseUUIDPipe) eventId: string,
-        @Body() input: SettingRewardsInputDto
-    ): Promise<CommonResponseDto> {
-        await firstValueFrom(
-            this.eventClient.send(EventRoute.settingRewards.cmd, [
-                requestor,
-                eventId,
-                input,
-            ])
-        );
-        return asSuccessResponse("이벤트 보상 설정 성공");
-    }
-
     @Route.Post(EventRoute.requestReward, {
         summary: "이벤트 보상 요청",
     })
     async requestReward(
         @Requestor() requestor: UserModel,
-        @Param("id", ParseUUIDPipe) eventId: string
+        @Param("id") eventId: string
     ): Promise<CommonResponseDto> {
         await firstValueFrom(
             this.eventClient.send(EventRoute.requestReward.cmd, [
@@ -173,7 +145,7 @@ export class EventController implements IEventController {
     })
     async approveRewardRequest(
         @Requestor() requestor: UserModel,
-        @Param("id", ParseUUIDPipe) rewardRequestId: string
+        @Param("id") rewardRequestId: string
     ): Promise<CommonResponseDto> {
         await firstValueFrom(
             this.eventClient.send(EventRoute.approveRewardRequest.cmd, [
@@ -189,7 +161,7 @@ export class EventController implements IEventController {
     })
     async rejectRewardRequest(
         @Requestor() requestor: UserModel,
-        @Param("id", ParseUUIDPipe) rewardRequestId: string,
+        @Param("id") rewardRequestId: string,
         @Body() input: RejectRewardRequestInputDto
     ): Promise<CommonResponseDto> {
         await firstValueFrom(
@@ -207,7 +179,7 @@ export class EventController implements IEventController {
     })
     async findOneRewardRequest(
         @Requestor() requestor: UserModel,
-        @Param("id", ParseUUIDPipe) rewardRequestId: string
+        @Param("id") rewardRequestId: string
     ): Promise<CommonResponseDto<EventRewardRequestModel>> {
         const result = await firstValueFrom(
             this.eventClient.send(EventRoute.findOneRewardRequest.cmd, [

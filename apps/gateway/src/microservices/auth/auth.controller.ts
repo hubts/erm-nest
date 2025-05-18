@@ -16,7 +16,7 @@ import {
     RefreshInputDto,
     RegisterAsInputDto,
 } from "apps/gateway/src/microservices/auth/dto";
-import { AUTH_SERVICE } from "../../gateway.constants";
+import { AUTH_SERVICE } from "../../common/constants";
 
 @ApiTags(AuthRoute.apiTags)
 @Controller(AuthRoute.pathPrefix)

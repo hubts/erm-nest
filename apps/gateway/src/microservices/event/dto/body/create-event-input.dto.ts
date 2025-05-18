@@ -11,6 +11,7 @@ import {
     IsOptional,
 } from "class-validator";
 import { CreateRewardInputDto } from "./create-reward-input.dto";
+import { generateId } from "@app/common";
 
 export class CreateEventInputDto implements CreateEventInput {
     @ApiProperty({
@@ -60,7 +61,7 @@ export class CreateEventInputDto implements CreateEventInput {
             conditions: [
                 {
                     leftOperand: {
-                        id: faker.string.uuid(),
+                        id: generateId(),
                     },
                     operator: "eq",
                     rightOperand: 7,
@@ -70,14 +71,14 @@ export class CreateEventInputDto implements CreateEventInput {
                     conditions: [
                         {
                             leftOperand: {
-                                id: faker.string.uuid(),
+                                id: generateId(),
                             },
-                            operator: "geq",
+                            operator: "gte",
                             rightOperand: 1000,
                         },
                         {
                             leftOperand: {
-                                id: faker.string.uuid(),
+                                id: generateId(),
                             },
                             operator: "eq",
                             rightOperand: "VIP",

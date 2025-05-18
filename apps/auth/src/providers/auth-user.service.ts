@@ -1,10 +1,10 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { hashSync, compareSync } from "bcrypt";
 import { UserModel, UserRole } from "@app/sdk";
-import { faker } from "@faker-js/faker";
 import { UserRepository } from "../repositories/user.repository";
 import { UserMapper } from "../mapper/user.mapper";
 import { RpcException } from "@nestjs/microservices";
+import { generateId } from "@app/common";
 
 @Injectable()
 export class AuthUserService {
@@ -41,8 +41,7 @@ export class AuthUserService {
         const user = await this.userRepo.create({
             email,
             password: hashSync(password, 10),
-            nickname:
-                nickname ?? `${role ?? UserRole.USER}-${faker.string.uuid()}`,
+            nickname: nickname ?? `${role ?? UserRole.USER}-${generateId()}`,
             ...(role && { role }),
         });
         return UserMapper.toModel(user);

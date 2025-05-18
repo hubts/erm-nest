@@ -24,7 +24,7 @@ export interface EventApi<
      * Events
      */
     // Create
-    create(user: R, body: CreateEventInput): Promise<CommonResponse>;
+    create(requestor: R, body: CreateEventInput): Promise<CommonResponse>;
     // Update
     update(
         requestor: R,
@@ -32,12 +32,9 @@ export interface EventApi<
         input: UpdateEventInput
     ): Promise<CommonResponse>;
     // Find one
-    findOne(requestor: R, id: string): Promise<CommonResponse<EventModel>>;
+    findOne(id: string): Promise<CommonResponse<EventModel>>;
     // Find all (via query)
-    findAll(
-        requestor: R,
-        query: FindAllEventsQuery
-    ): Promise<CommonResponse<EventModel[]>>;
+    findAll(query: FindAllEventsQuery): Promise<CommonResponse<EventModel[]>>;
 
     /**
      * Event condition
@@ -52,16 +49,6 @@ export interface EventApi<
         requestor: R,
         query: FindAllEventConditionsQuery
     ): Promise<CommonResponse<EventConditionModel[]>>;
-
-    /**
-     * Rewards
-     */
-    // Set a rewards
-    settingRewards(
-        requestor: R,
-        eventId: string,
-        input: SettingRewardsInput
-    ): Promise<CommonResponse>;
 
     /**
      * Reward Requests
@@ -120,6 +107,10 @@ export interface CreateEventInput
     rewards?: CreateRewardInput[];
 }
 
+// 이벤트 보상 입력
+export interface CreateRewardInput
+    extends Pick<EventRewardModel, "name" | "type" | "amount"> {}
+
 // 이벤트 업데이트 입력
 export interface UpdateEventInput extends Partial<CreateEventInput> {}
 
@@ -129,13 +120,6 @@ export interface FindAllEventsQuery
         Partial<
             Pick<EventModel, "startedAt" | "endedAt" | "name" | "status">
         > {}
-
-// 이벤트 보상 입력
-export interface CreateRewardInput
-    extends Pick<EventRewardModel, "name" | "type" | "amount"> {}
-export interface SettingRewardsInput {
-    rewards: CreateRewardInput[];
-}
 
 // 이벤트 보상 요청 거절 입력
 export interface RejectRewardRequestInput

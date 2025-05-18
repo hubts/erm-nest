@@ -1,6 +1,6 @@
 {
     "name": "event-reward-management",
-    "version": "0.0.2-9",
+    "version": "0.0.2-10",
     "description": "REST API for Event Reward Management",
     "author": "@hubts",
     "private": true,
@@ -30,8 +30,12 @@
         "#----------------GIT-----------------------#": "GIT",
         "git": "./scripts/git/skyrocket.sh",
         "#----------------SDK-----------------------#": "SDK",
-        "sdk": "cd sdk && yarn publish",
-        "sdk:link": "cd sdk && yarn build && yarn link && cd .. && yarn link $npm_package_name-sdk"
+        "sdk": "cd libs/sdk && yarn publish",
+        "sdk:link": "cd libs/sdk && yarn build && yarn link && cd .. && yarn link $npm_package_name-sdk",
+        "#----------------Docker--------------------#": "Docker",
+        "docker:compose": "docker compose up -f docker-compose.yml up -d",
+        "docker:compose:build": "docker compose -f docker-compose.yml up -d --build",
+        "docker:compose:log": "docker compose logs -f auth event gateway | cat"
     },
     "dependencies": {
         "@faker-js/faker": "^9.7.0",
@@ -47,7 +51,6 @@
         "bcrypt": "^6.0.0",
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.2",
-        "dotenv": "^16.5.0",
         "mongoose": "^8.14.3",
         "passport": "^0.7.0",
         "passport-jwt": "^4.0.1",

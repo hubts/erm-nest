@@ -12,16 +12,14 @@ import { asErrorResponse } from "../dto";
 import { convertRpcException } from "./convert-rpc-exception";
 
 @Catch()
-export class AllExceptionFilter implements ExceptionFilter {
+export class GatewayErrorFilter implements ExceptionFilter {
     constructor(private readonly logger: Logger) {}
 
-    catch(error: unknown, host: ArgumentsHost) {
+    catch(error: Error | HttpException, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
         const request = ctx.getRequest<Request>();
         const response = ctx.getResponse<Response>();
         const path = `${request.method} ${request.url}`;
-
-        this.logger.error(error);
 
         // Microservice 연결 실패 시 처리
         if ((error as any).code === "ECONNREFUSED") {
@@ -34,7 +32,6 @@ export class AllExceptionFilter implements ExceptionFilter {
 
         // RPC to HttpException
         const normalizedError = convertRpcException(error);
-
         const status =
             normalizedError instanceof HttpException
                 ? normalizedError.getStatus()
@@ -42,6 +39,17 @@ export class AllExceptionFilter implements ExceptionFilter {
         const message = normalizedError.message;
         const stack = normalizedError.stack;
         const cause = normalizedError.cause;
+
+        this.logger.error(
+            JSON.stringify(
+                {
+                    error: normalizedError,
+                    path,
+                },
+                null,
+                4
+            )
+        );
 
         // Return
         response.status(status as number).json({

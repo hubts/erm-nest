@@ -1,5 +1,6 @@
 import { AbstractDocument } from "@app/common";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { SchemaTypes } from "mongoose";
 
 @Schema({
     versionKey: false,
@@ -17,7 +18,7 @@ export class EventUserLogging extends AbstractDocument {
     @Prop({ required: true, type: String })
     fieldName: string;
 
-    @Prop({ required: true })
+    @Prop({ required: true, type: SchemaTypes.Mixed })
     value: string | number | Date;
 
     @Prop({ required: false, type: Object })

@@ -2,7 +2,6 @@ import { FindAllRewardRequestsQuery } from "@app/sdk";
 import { PaginationQueryDto } from "@app/common";
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { IsString, IsOptional, IsIn } from "class-validator";
-import { faker } from "@faker-js/faker";
 
 export class FindAllRewardRequestsQueryDto
     extends PaginationQueryDto
@@ -10,7 +9,6 @@ export class FindAllRewardRequestsQueryDto
 {
     @ApiPropertyOptional({
         description: "이벤트 ID",
-        example: faker.string.uuid(),
     })
     @IsString()
     @IsOptional()
@@ -18,7 +16,6 @@ export class FindAllRewardRequestsQueryDto
 
     @ApiPropertyOptional({
         description: "사용자 ID",
-        example: faker.string.uuid(),
     })
     @IsString()
     @IsOptional()

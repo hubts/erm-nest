@@ -1,12 +1,12 @@
-import { APP_INTERCEPTOR } from "@nestjs/core";
-import { Module } from "@nestjs/common";
+import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
+import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { MongooseModule } from "@nestjs/mongoose";
 import { EventService } from "./providers/event.service";
 import { CONFIGURATIONS } from "../config/configuration";
 import { MongooseConfigService } from "../config/mongoose.config.service";
 import { EventRepository } from "./repositories/event.repository";
-import { DefaultIfEmptyInterceptor } from "@app/common";
+import { DefaultIfEmptyInterceptor, RpcErrorFilter } from "@app/common";
 import { EventRpcHandler } from "./event.rpc-handler";
 import {
     Event,
@@ -48,6 +48,7 @@ import {
     ],
     controllers: [EventRpcHandler],
     providers: [
+        Logger,
         EventService,
         EventRepository,
         EventConditionService,
@@ -59,6 +60,10 @@ import {
         {
             provide: APP_INTERCEPTOR,
             useClass: DefaultIfEmptyInterceptor,
+        },
+        {
+            provide: APP_FILTER,
+            useClass: RpcErrorFilter,
         },
     ],
 })

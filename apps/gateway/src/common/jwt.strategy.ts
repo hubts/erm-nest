@@ -4,7 +4,7 @@ import { ConfigType } from "@nestjs/config";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { JwtConfig } from "apps/auth/config/jwt.config";
 import { AuthRoute, JwtPayload } from "@app/sdk";
-import { AUTH_SERVICE } from "../gateway.constants";
+import { AUTH_SERVICE } from "./constants";
 import { ClientProxy } from "@nestjs/microservices";
 import { firstValueFrom } from "rxjs";
 
@@ -45,7 +45,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
         // User check
         const user = await firstValueFrom(
-            this.authClient.send(AuthRoute.getAuthorizedUser.cmd, id)
+            this.authClient.send(AuthRoute.getAuthorizedUser.cmd, [id])
         );
         if (!user) {
             throw new UnauthorizedException("존재하지 않는 유저입니다.");

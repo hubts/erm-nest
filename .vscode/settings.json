@@ -3,6 +3,7 @@
         "ADMINPASSWORD",
         "ADMINUSERNAME",
         "BASICAUTH",
+        "dbname",
         "INITDB",
         "mongosh",
         "premajor",

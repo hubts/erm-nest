@@ -3,10 +3,10 @@ import { APP_FILTER, APP_PIPE } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { CONFIGURATIONS } from "../config/configuration";
 import { ClientsModule } from "@nestjs/microservices";
-import { AUTH_SERVICE, EVENT_SERVICE } from "./gateway.constants";
+import { AUTH_SERVICE, EVENT_SERVICE } from "./common/constants";
 import { AuthServiceConfigService } from "../config/microservices/auth-service.config.service";
 import { EventServiceConfigService } from "../config/microservices/event-service.config.service";
-import { AllExceptionFilter, CustomValidationPipe } from "@app/common";
+import { GatewayErrorFilter, CustomValidationPipe } from "@app/common";
 import { JwtStrategy } from "./common/jwt.strategy";
 import { EventController } from "./microservices/event/event.controller";
 import { AuthController } from "./microservices/auth/auth.controller";
@@ -37,7 +37,7 @@ import { AuthController } from "./microservices/auth/auth.controller";
         Logger,
         {
             provide: APP_FILTER,
-            useClass: AllExceptionFilter,
+            useClass: GatewayErrorFilter,
         },
         {
             provide: APP_PIPE,

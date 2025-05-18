@@ -6,6 +6,7 @@ export function convertRpcException(error: unknown): HttpException {
         const payload = error.getError() as {
             statusCode: number;
             message: string;
+            stack?: string;
         };
         return new HttpException(payload.message, payload.statusCode, {
             cause: payload,

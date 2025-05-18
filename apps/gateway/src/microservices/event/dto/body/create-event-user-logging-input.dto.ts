@@ -1,5 +1,5 @@
+import { generateId } from "@app/common";
 import { CreateEventUserLoggingInput } from "@app/sdk";
-import { faker } from "@faker-js/faker";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString, IsNotEmpty } from "class-validator";
 
@@ -8,7 +8,7 @@ export class CreateEventUserLoggingInputDto
 {
     @ApiProperty({
         description: "사용자 ID",
-        example: faker.string.uuid(),
+        example: generateId(),
     })
     @IsString()
     @IsNotEmpty()

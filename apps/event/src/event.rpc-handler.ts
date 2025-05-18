@@ -15,7 +15,6 @@ import {
     FindAllRewardRequestsQuery,
     IEventService,
     RejectRewardRequestInput,
-    SettingRewardsInput,
     UpdateEventInput,
     UserModel,
 } from "@app/sdk";
@@ -59,17 +58,17 @@ export class EventRpcHandler implements IEventService {
     }
 
     @MessagePattern(EventRoute.findOne.cmd)
-    async findOne(
-        @Payload() payload: [user: UserModel, id: string]
-    ): Promise<EventModel> {
-        return await this.eventService.findOneOrThrowById(payload[1]);
+    async findOne(@Payload() payload: [id: string]): Promise<EventModel> {
+        const [id] = payload;
+        return await this.eventService.findOneOrThrowById(id);
     }
 
     @MessagePattern(EventRoute.findAll.cmd)
     async findAll(
-        @Payload() payload: [user: UserModel, query: FindAllEventsQuery]
+        @Payload() payload: [query: FindAllEventsQuery]
     ): Promise<EventModel[]> {
-        return await this.eventService.findAll(payload[1]);
+        const [query] = payload;
+        return await this.eventService.findAll(query);
     }
 
     @MessagePattern(EventRoute.createEventCondition.cmd)
@@ -91,20 +90,6 @@ export class EventRpcHandler implements IEventService {
         payload: [user: UserModel, query: FindAllEventConditionsQuery]
     ): Promise<EventConditionModel[]> {
         return await this.eventConditionService.findAll(payload[1]);
-    }
-
-    @MessagePattern(EventRoute.settingRewards.cmd)
-    async settingRewards(
-        @Payload()
-        payload: [user: UserModel, eventId: string, input: SettingRewardsInput]
-    ): Promise<void> {
-        const [user, eventId, input] = payload;
-        const event = await this.eventService.findOneOrThrowById(eventId);
-        await this.eventService.settingRewards({
-            event,
-            input,
-            updatedBy: user.id,
-        });
     }
 
     @MessagePattern(EventRoute.requestReward.cmd)

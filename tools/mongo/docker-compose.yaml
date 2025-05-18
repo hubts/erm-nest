@@ -1,4 +1,3 @@
-version: "3.6"
 services:
     mongodb:
         image: mongo:latest # MongoDB 버전
@@ -16,6 +15,8 @@ services:
         command: mongod --auth
         env_file:
             - .env
+        networks:
+            - event-reward-network
     mongo-express:
         image: mongo-express:latest # Mongo Express 버전
         container_name: ${MONGO_EXPRESS_CONTAINER_NAME} # 실행하는 컨테이너의 이름 (환경변수 연동)
@@ -32,3 +33,9 @@ services:
             ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_AUTH_PASSWORD} # Mongo Express 인증 password (환경변수 연동)
         depends_on:
             - mongodb
+        networks:
+            - event-reward-network
+
+networks:
+    event-reward-network:
+        external: true

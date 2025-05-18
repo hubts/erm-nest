@@ -1,9 +1,9 @@
-import { APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { MongooseModule } from "@nestjs/mongoose";
 import { JwtModule } from "@nestjs/jwt";
-import { DefaultIfEmptyInterceptor } from "@app/common";
+import { DefaultIfEmptyInterceptor, RpcErrorFilter } from "@app/common";
 import {
     CONFIGURATIONS,
     MongooseConfigService,
@@ -42,6 +42,10 @@ import { AuthRpcHandler } from "./auth.rpc-handler";
         {
             provide: APP_INTERCEPTOR,
             useClass: DefaultIfEmptyInterceptor,
+        },
+        {
+            provide: APP_FILTER,
+            useClass: RpcErrorFilter,
         },
     ],
 })

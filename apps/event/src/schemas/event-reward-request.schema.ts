@@ -1,11 +1,9 @@
 import { AbstractDocument } from "@app/common";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import {
-    EventModel,
-    EventRewardModel,
-    EventUserLoggingModel,
-    UserModel,
-} from "@app/sdk";
+import { EventRewardModel, EventUserLoggingModel } from "@app/sdk";
+import { Types } from "mongoose";
+import { Event } from "./event.schema";
+import { User } from "apps/auth/src/schemas";
 
 @Schema({
     versionKey: false,
@@ -15,11 +13,11 @@ import {
     },
 })
 export class EventRewardRequest extends AbstractDocument {
-    @Prop({ required: true, type: Object })
-    event: EventModel;
+    @Prop({ type: Types.ObjectId, ref: "Event" })
+    event: Types.ObjectId | Event;
 
-    @Prop({ required: true, type: Object })
-    user: UserModel;
+    @Prop({ type: Types.ObjectId, ref: "User" })
+    user: Types.ObjectId | User;
 
     @Prop({ required: true, type: String, default: "pending" })
     status: "pending" | "insufficient" | "approved" | "rejected";

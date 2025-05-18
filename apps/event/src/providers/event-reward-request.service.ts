@@ -13,18 +13,21 @@ import { EventConditionService } from "./event-condition.service";
 import { EventUserLoggingService } from "./event-user-logging.service";
 import { checkEventRewardRequest } from "../domain/event-reward-request-checker";
 import { RpcException } from "@nestjs/microservices";
-import { FilterQuery } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 import { EventRewardRequest } from "../schemas";
 import { EventRewardRequestMapper } from "../mapper";
+import { EventService } from "./event.service";
 
 @Injectable()
 export class EventRewardRequestService {
     constructor(
         private readonly eventRewardRequestRepo: EventRewardRequestRepository,
         private readonly eventConditionService: EventConditionService,
-        private readonly eventUserLoggingService: EventUserLoggingService
+        private readonly eventUserLoggingService: EventUserLoggingService,
+        private readonly eventService: EventService
     ) {}
 
+    // Request reward
     async requestReward(user: UserModel, event: EventModel) {
         // 조건 검사 자동 시스템
         const eventConditionIds = extractLeftOperandIds(event.condition);
@@ -53,19 +56,29 @@ export class EventRewardRequestService {
             ? "pending"
             : "approved";
         await this.eventRewardRequestRepo.create({
-            event,
-            user,
+            event: new Types.ObjectId(event.id),
+            user: new Types.ObjectId(user.id),
             status,
             determinedAt: status === "approved" ? new Date() : undefined,
             receivedRewards: status === "approved" ? event.rewards : [],
         });
     }
 
+    // Approve reward request
     async approveRewardRequest(
         user: UserModel,
         rewardRequestId: string
     ): Promise<void> {
         const rewardRequest = await this.findOneOrThrowById(rewardRequestId);
+        if (rewardRequest.status !== "pending") {
+            throw new RpcException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: "이미 승인되거나 거절된 이벤트 보상 요청입니다.",
+            });
+        }
+        const event = await this.eventService.findOneOrThrowById(
+            rewardRequest.eventId
+        );
         await this.eventRewardRequestRepo.updateOne(
             {
                 _id: rewardRequest.id,
@@ -74,17 +87,26 @@ export class EventRewardRequestService {
                 status: "approved",
                 determinedAt: new Date(),
                 determinedBy: user.id,
+                receivedRewards: event.rewards,
             }
         );
     }
 
+    // Reject reward request
     async rejectRewardRequest(
         user: UserModel,
         rewardRequestId: string,
         input: RejectRewardRequestInput
     ): Promise<void> {
         const { reason } = input;
+        console.log(rewardRequestId);
         const rewardRequest = await this.findOneOrThrowById(rewardRequestId);
+        if (rewardRequest.status !== "pending") {
+            throw new RpcException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: "이미 승인되거나 거절된 이벤트 보상 요청입니다.",
+            });
+        }
         await this.eventRewardRequestRepo.updateOne(
             {
                 _id: rewardRequest.id,
@@ -98,9 +120,10 @@ export class EventRewardRequestService {
         );
     }
 
+    // Find one reward request
     async findOneOrThrowById(id: string) {
         const eventRewardRequest = await this.eventRewardRequestRepo.findOne({
-            id,
+            _id: id,
         });
         if (!eventRewardRequest) {
             throw new RpcException({
@@ -111,6 +134,7 @@ export class EventRewardRequestService {
         return EventRewardRequestMapper.toModel(eventRewardRequest);
     }
 
+    // Find reward requests
     async findAllRewardRequests(
         user: UserModel,
         query: FindAllRewardRequestsQuery
@@ -123,10 +147,10 @@ export class EventRewardRequestService {
         const { skip, take, eventId, userId, status } = query;
         const filter: FilterQuery<EventRewardRequest> = {};
         if (eventId) {
-            filter.eventId = eventId;
+            filter.event = new Types.ObjectId(eventId);
         }
         if (userId) {
-            filter.userId = userId;
+            filter.user = new Types.ObjectId(userId);
         }
         if (status) {
             filter.status = status;

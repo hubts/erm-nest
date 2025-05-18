@@ -9,14 +9,14 @@ import {
     Requestor,
     Route,
 } from "@app/common";
-import { AUTH_SERVICE } from "../gateway.constants";
 import {
     RegisterInputDto,
     AuthTokenDto,
     LoginInputDto,
     RefreshInputDto,
     RegisterAsInputDto,
-} from "apps/auth/src/dto";
+} from "apps/gateway/src/microservices/auth/dto";
+import { AUTH_SERVICE } from "../../gateway.constants";
 
 @ApiTags(AuthRoute.apiTags)
 @Controller(AuthRoute.pathPrefix)
@@ -38,7 +38,7 @@ export class AuthController
         @Body() input: RegisterInputDto
     ): Promise<CommonResponseDto<void>> {
         await firstValueFrom(
-            this.authClient.send(AuthRoute.register.cmd, input)
+            this.authClient.send(AuthRoute.register.cmd, [input])
         );
         return asSuccessResponse("회원가입에 성공");
     }
@@ -55,7 +55,7 @@ export class AuthController
         @Body() input: LoginInputDto
     ): Promise<CommonResponseDto<AuthTokenDto>> {
         const result = await firstValueFrom(
-            this.authClient.send(AuthRoute.login.cmd, input)
+            this.authClient.send(AuthRoute.login.cmd, [input])
         );
         return asSuccessResponse("로그인에 성공", result);
     }
@@ -70,7 +70,7 @@ export class AuthController
         @Requestor() requestor: UserModel
     ): Promise<CommonResponseDto<void>> {
         await firstValueFrom(
-            this.authClient.send(AuthRoute.logout.cmd, requestor)
+            this.authClient.send(AuthRoute.logout.cmd, [requestor])
         );
         return asSuccessResponse("로그아웃에 성공");
     }
@@ -87,7 +87,7 @@ export class AuthController
         @Body() input: RefreshInputDto
     ): Promise<CommonResponseDto<AuthTokenDto>> {
         const result = await firstValueFrom(
-            this.authClient.send(AuthRoute.refresh.cmd, input)
+            this.authClient.send(AuthRoute.refresh.cmd, [input])
         );
         return asSuccessResponse("토큰 갱신에 성공", result);
     }
@@ -102,7 +102,7 @@ export class AuthController
         @Body() input: RegisterAsInputDto
     ): Promise<CommonResponseDto<void>> {
         await firstValueFrom(
-            this.authClient.send(AuthRoute.registerAs.cmd, input)
+            this.authClient.send(AuthRoute.registerAs.cmd, [input])
         );
         return asSuccessResponse("특정 역할 회원가입에 성공");
     }

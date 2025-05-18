@@ -5,5 +5,9 @@
         "outDir": "../../dist/libs/sdk"
     },
     "include": ["src/**/*"],
-    "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
+    "exclude": ["node_modules", "dist", "test", "**/*spec.ts"],
+    "paths": {
+        "@app/sdk": ["src"],
+        "@app/sdk/*": ["src/*"]
+    }
 }

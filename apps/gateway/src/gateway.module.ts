@@ -7,16 +7,16 @@ import { AUTH_SERVICE, EVENT_SERVICE } from "./gateway.constants";
 import { AuthServiceConfigService } from "../config/microservices/auth-service.config.service";
 import { EventServiceConfigService } from "../config/microservices/event-service.config.service";
 import { AllExceptionFilter, CustomValidationPipe } from "@app/common";
-import { EventController } from "./microservices/event.controller";
-import { AuthController } from "./microservices/auth.controller";
-import { JwtStrategy } from "./auth/jwt.strategy";
+import { JwtStrategy } from "./common/jwt.strategy";
+import { EventController } from "./microservices/event/event.controller";
+import { AuthController } from "./microservices/auth/auth.controller";
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
             load: CONFIGURATIONS,
-            envFilePath: ["./apps/gateway/.env"],
+            envFilePath: "./apps/gateway/.env",
         }),
         ClientsModule.registerAsync({
             clients: [

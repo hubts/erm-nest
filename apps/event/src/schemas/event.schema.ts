@@ -31,7 +31,7 @@ export class Event extends AbstractDocument {
     @Prop({ required: true, type: String })
     rewardDistributionType: "manual" | "auto";
 
-    @Prop({ required: false })
+    @Prop({ required: false, type: [Object] })
     rewards: EventRewardModel[];
 
     @Prop({ required: false, default: Date.now })

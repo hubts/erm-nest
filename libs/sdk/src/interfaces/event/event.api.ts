@@ -1,4 +1,9 @@
-import { PaginationQuery, ServiceToApi } from "@app/sdk";
+import {
+    ApiToService,
+    CommonResponse,
+    Paginated,
+    PaginationQuery,
+} from "@app/sdk";
 import { UserModel } from "../auth";
 import {
     EventConditionModel,
@@ -19,13 +24,20 @@ export interface EventApi<
      * Events
      */
     // Create
-    create(requestor: R, input: CreateEventInput): Promise<void>;
+    create(user: R, body: CreateEventInput): Promise<CommonResponse>;
     // Update
-    update(requestor: R, id: string, input: UpdateEventInput): Promise<void>;
+    update(
+        requestor: R,
+        id: string,
+        input: UpdateEventInput
+    ): Promise<CommonResponse>;
     // Find one
-    findOne(requestor: R, id: string): Promise<EventModel>;
+    findOne(requestor: R, id: string): Promise<CommonResponse<EventModel>>;
     // Find all (via query)
-    findAll(requestor: R, query: FindAllEventsQuery): Promise<EventModel[]>;
+    findAll(
+        requestor: R,
+        query: FindAllEventsQuery
+    ): Promise<CommonResponse<EventModel[]>>;
 
     /**
      * Event condition
@@ -34,12 +46,12 @@ export interface EventApi<
     createEventCondition(
         requestor: R,
         input: CreateEventConditionInput
-    ): Promise<void>;
+    ): Promise<CommonResponse>;
     // Find all condition types
     findAllEventConditions(
         requestor: R,
         query: FindAllEventConditionsQuery
-    ): Promise<EventConditionModel[]>;
+    ): Promise<CommonResponse<EventConditionModel[]>>;
 
     /**
      * Rewards
@@ -49,45 +61,50 @@ export interface EventApi<
         requestor: R,
         eventId: string,
         input: SettingRewardsInput
-    ): Promise<void>;
+    ): Promise<CommonResponse>;
 
     /**
      * Reward Requests
      */
     // Request an event reward
-    requestReward(requestor: R, eventId: string): Promise<void>;
+    requestReward(requestor: R, eventId: string): Promise<CommonResponse>;
     // Approve a reward request
-    approveRewardRequest(requestor: R, rewardRequestId: string): Promise<void>;
+    approveRewardRequest(
+        requestor: R,
+        rewardRequestId: string
+    ): Promise<CommonResponse>;
     // Reject a reward request
     rejectRewardRequest(
         requestor: R,
         rewardRequestId: string,
         input: RejectRewardRequestInput
-    ): Promise<void>;
+    ): Promise<CommonResponse>;
     // Find one reward request
     findOneRewardRequest(
         requestor: R,
         rewardRequestId: string
-    ): Promise<EventRewardRequestModel>;
+    ): Promise<CommonResponse<EventRewardRequestModel>>;
     // Find all reward requests
     findAllRewardRequests(
         requestor: R,
         query: FindAllRewardRequestsQuery
-    ): Promise<EventRewardRequestModel[]>;
+    ): Promise<CommonResponse<Paginated<EventRewardRequestModel>>>;
 
     /**
      * TEST: Event User Logging
      */
     // Log a user's event participation
-    createEventUserLogging(input: CreateEventUserLoggingInput): Promise<void>;
+    createEventUserLogging(
+        input: CreateEventUserLoggingInput
+    ): Promise<CommonResponse>;
     // Find all event user loggings
     findAllEventUserLoggings(
         requestor: R,
         query: FindAllEventUserLoggingsQuery
-    ): Promise<EventUserLoggingModel[]>;
+    ): Promise<CommonResponse<EventUserLoggingModel[]>>;
 }
-export type IEventService = EventApi<UserModel>;
-export type IEventController = ServiceToApi<EventApi<UserModel>>;
+export type IEventController = EventApi<UserModel>;
+export type IEventService = ApiToService<EventApi<UserModel>>;
 
 // 이벤트 생성 입력
 export interface CreateEventInput
@@ -99,7 +116,9 @@ export interface CreateEventInput
         | "endedAt"
         | "condition"
         | "rewardDistributionType"
-    > {}
+    > {
+    rewards?: CreateRewardInput[];
+}
 
 // 이벤트 업데이트 입력
 export interface UpdateEventInput extends Partial<CreateEventInput> {}
@@ -112,10 +131,10 @@ export interface FindAllEventsQuery
         > {}
 
 // 이벤트 보상 입력
+export interface CreateRewardInput
+    extends Pick<EventRewardModel, "name" | "type" | "amount"> {}
 export interface SettingRewardsInput {
-    rewards: (Pick<EventRewardModel, "name" | "type" | "amount"> & {
-        id?: string;
-    })[];
+    rewards: CreateRewardInput[];
 }
 
 // 이벤트 보상 요청 거절 입력
@@ -136,7 +155,7 @@ export interface CreateEventConditionInput
 // 이벤트 조건 조회 쿼리
 export interface FindAllEventConditionsQuery
     extends PaginationQuery,
-        Pick<EventConditionModel, "displayName"> {}
+        Partial<Pick<EventConditionModel, "displayName">> {}
 
 // 이벤트 사용자 로깅 생성 입력
 export interface CreateEventUserLoggingInput
@@ -145,7 +164,8 @@ export interface CreateEventUserLoggingInput
 // 이벤트 사용자 로깅 조회 쿼리
 export interface FindAllEventUserLoggingsQuery
     extends PaginationQuery,
-        Pick<EventUserLoggingModel, "userId" | "fieldName"> {
+        Partial<Pick<EventUserLoggingModel, "userId" | "fieldName">> {
     startedAt?: Date;
     endedAt?: Date;
+    fieldNames?: string[];
 }

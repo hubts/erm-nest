@@ -1,5 +1,5 @@
 import { UserModel, UserRole } from "./auth.model";
-import { ServiceToApi } from "@app/sdk";
+import { ApiToService, CommonResponse } from "@app/sdk";
 
 /**
  * 인증 API 인터페이스
@@ -7,20 +7,20 @@ import { ServiceToApi } from "@app/sdk";
  */
 export interface AuthApi<R extends UserModel | string | undefined = undefined> {
     // Register
-    register(input: RegisterInput): Promise<void>;
+    register(input: RegisterInput): Promise<CommonResponse>;
     // Login
-    login(input: LoginInput): Promise<AuthToken>;
+    login(input: LoginInput): Promise<CommonResponse<AuthToken>>;
     // Logout
-    logout(requestor: R): Promise<void>;
+    logout(requestor: R): Promise<CommonResponse>;
     // Refresh tokens
-    refresh(input: RefreshInput): Promise<AuthToken>;
+    refresh(input: RefreshInput): Promise<CommonResponse<AuthToken>>;
     // Register as special role
-    registerAs(input: RegisterAsInput): Promise<void>;
+    registerAs(input: RegisterAsInput): Promise<CommonResponse>;
     // Get authorized user
-    getAuthorizedUser(id: string): Promise<UserModel>;
+    getAuthorizedUser(id: string): Promise<CommonResponse<UserModel>>;
 }
-export type IAuthService = AuthApi<UserModel>;
-export type IAuthController = ServiceToApi<AuthApi<UserModel>>;
+export type IAuthController = AuthApi<UserModel>;
+export type IAuthService = ApiToService<AuthApi<UserModel>>;
 
 // 회원가입 입력
 export interface RegisterInput

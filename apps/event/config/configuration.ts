@@ -10,17 +10,9 @@ export const CONFIGURATIONS = [ServerConfig, MongooseConfig];
 export type Configuration = {
     Server: {
         env: ServerEnv;
+        host: string;
         port: number;
         isProduction: boolean;
-        adminSecret: string;
-        endpoint: {
-            external: string;
-            globalPrefix: string;
-        };
-        docs: {
-            path: string;
-            fullPath: string;
-        };
     };
     Mongoose: {
         uri: string;

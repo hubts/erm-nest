@@ -1,13 +1,16 @@
 import { CreateEventInput, EventConditionGroup } from "@app/sdk";
 import { faker } from "@faker-js/faker";
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
     IsString,
     IsNotEmpty,
     IsDateString,
     IsIn,
     IsObject,
+    IsArray,
+    IsOptional,
 } from "class-validator";
+import { CreateRewardInputDto } from "./create-reward-input.dto";
 
 export class CreateEventInputDto implements CreateEventInput {
     @ApiProperty({
@@ -44,11 +47,10 @@ export class CreateEventInputDto implements CreateEventInput {
 
     @ApiProperty({
         description: "이벤트 보상 지급 방식",
-        example: "manual",
+        enum: ["manual", "auto"],
     })
-    @IsString()
-    @IsNotEmpty()
     @IsIn(["manual", "auto"])
+    @IsNotEmpty()
     rewardDistributionType: "manual" | "auto";
 
     @ApiProperty({
@@ -88,4 +90,12 @@ export class CreateEventInputDto implements CreateEventInput {
     @IsObject()
     @IsNotEmpty()
     condition: EventConditionGroup;
+
+    @ApiPropertyOptional({
+        description: "이벤트 보상",
+        type: [CreateRewardInputDto],
+    })
+    @IsArray()
+    @IsOptional()
+    rewards: CreateRewardInputDto[];
 }

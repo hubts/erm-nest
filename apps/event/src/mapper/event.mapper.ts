@@ -16,6 +16,7 @@ export const EventMapper = {
             endedAt: event.endedAt,
             condition: event.condition,
             rewardDistributionType: event.rewardDistributionType,
+            rewards: event.rewards,
         };
     },
 };

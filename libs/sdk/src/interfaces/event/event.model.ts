@@ -15,6 +15,7 @@ export interface EventModel {
     endedAt: Date;
     condition: EventConditionGroup;
     rewardDistributionType: "manual" | "auto";
+    rewards: EventRewardModel[];
 }
 
 // 이벤트 조건 그룹
@@ -82,7 +83,7 @@ export interface EventRewardRequestModel {
     reason?: string;
     determinedAt: Date;
     determinedBy: string;
-    rewardId?: string;
+    receivedRewards: EventRewardModel[];
     eventUserLoggings: EventUserLoggingModel[];
 }
 

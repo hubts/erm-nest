@@ -1,13 +1,33 @@
+import { APP_INTERCEPTOR } from "@nestjs/core";
 import { Module } from "@nestjs/common";
-import { EventController } from "./event.controller";
-import { EventService } from "./event.service";
 import { ConfigModule } from "@nestjs/config";
+import { MongooseModule } from "@nestjs/mongoose";
+import { EventService } from "./providers/event.service";
 import { CONFIGURATIONS } from "../config/configuration";
 import { MongooseConfigService } from "../config/mongoose.config.service";
-import { MongooseModule } from "@nestjs/mongoose";
-import { EventSchema } from "./schemas/event.schema";
 import { EventRepository } from "./repositories/event.repository";
-import { EventManagementService } from "./providers/event-management.service";
+import { DefaultIfEmptyInterceptor } from "@app/common";
+import { EventRpcHandler } from "./event.rpc-handler";
+import {
+    Event,
+    EventSchema,
+    EventCondition,
+    EventConditionSchema,
+    EventRewardRequest,
+    EventRewardRequestSchema,
+    EventUserLogging,
+    EventUserLoggingSchema,
+} from "./schemas";
+import {
+    EventConditionService,
+    EventRewardRequestService,
+    EventUserLoggingService,
+} from "./providers";
+import {
+    EventConditionRepository,
+    EventRewardRequestRepository,
+    EventUserLoggingRepository,
+} from "./repositories";
 
 @Module({
     imports: [
@@ -19,9 +39,27 @@ import { EventManagementService } from "./providers/event-management.service";
         MongooseModule.forRootAsync({
             useClass: MongooseConfigService,
         }),
-        MongooseModule.forFeature([{ name: Event.name, schema: EventSchema }]),
+        MongooseModule.forFeature([
+            { name: Event.name, schema: EventSchema },
+            { name: EventCondition.name, schema: EventConditionSchema },
+            { name: EventRewardRequest.name, schema: EventRewardRequestSchema },
+            { name: EventUserLogging.name, schema: EventUserLoggingSchema },
+        ]),
     ],
-    controllers: [EventController],
-    providers: [EventService, EventRepository, EventManagementService],
+    controllers: [EventRpcHandler],
+    providers: [
+        EventService,
+        EventRepository,
+        EventConditionService,
+        EventConditionRepository,
+        EventRewardRequestService,
+        EventRewardRequestRepository,
+        EventUserLoggingService,
+        EventUserLoggingRepository,
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: DefaultIfEmptyInterceptor,
+        },
+    ],
 })
 export class EventModule {}

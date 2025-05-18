@@ -1,11 +1,9 @@
-import { APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
+import { APP_INTERCEPTOR } from "@nestjs/core";
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { MongooseModule } from "@nestjs/mongoose";
-import { AuthController } from "./auth.controller";
-import { AuthService } from "./auth.service";
 import { JwtModule } from "@nestjs/jwt";
-import { CustomValidationPipe, DefaultIfEmptyInterceptor } from "@app/common";
+import { DefaultIfEmptyInterceptor } from "@app/common";
 import {
     CONFIGURATIONS,
     MongooseConfigService,
@@ -14,6 +12,7 @@ import {
 import { AuthUserService, AuthTokenService } from "./providers";
 import { UserRepository, TokenRepository } from "./repositories";
 import { User, UserSchema, Token, TokenSchema } from "./schemas";
+import { AuthRpcHandler } from "./auth.rpc-handler";
 
 @Module({
     imports: [
@@ -33,18 +32,13 @@ import { User, UserSchema, Token, TokenSchema } from "./schemas";
             useClass: JwtConfigService,
         }),
     ],
-    controllers: [AuthController],
+    controllers: [AuthRpcHandler],
     providers: [
-        AuthService,
-        UserRepository,
         AuthUserService,
+        UserRepository,
         AuthTokenService,
         TokenRepository,
         Logger,
-        {
-            provide: APP_PIPE,
-            useClass: CustomValidationPipe,
-        },
         {
             provide: APP_INTERCEPTOR,
             useClass: DefaultIfEmptyInterceptor,

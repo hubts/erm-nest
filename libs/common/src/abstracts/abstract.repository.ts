@@ -2,6 +2,7 @@ import { FilterQuery, Model, SaveOptions, Types, UpdateQuery } from "mongoose";
 import { AbstractDocument } from "./abstract.document";
 import { HttpStatus } from "@nestjs/common";
 import { RpcException } from "@nestjs/microservices";
+import { PaginationQuery } from "@app/sdk";
 
 export abstract class AbstractRepository<T extends AbstractDocument> {
     constructor(protected readonly model: Model<T>) {}
@@ -30,8 +31,28 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
         return document;
     }
 
-    async find(filterQuery: FilterQuery<T>): Promise<T[]> {
+    async count(filterQuery: FilterQuery<T>): Promise<number> {
+        return this.model.countDocuments(filterQuery).exec();
+    }
+
+    async findAll(filterQuery: FilterQuery<T>): Promise<T[]> {
         return this.model.find(filterQuery).exec();
+    }
+
+    async findPaginated(
+        filterQuery: FilterQuery<T>,
+        options: PaginationQuery
+    ): Promise<T[]> {
+        const { skip, take } = options;
+
+        let query = this.model.find(filterQuery);
+        if (skip >= 0) {
+            query = query.skip(skip);
+        }
+        if (take >= 1) {
+            query = query.limit(take);
+        }
+        return query.exec();
     }
 
     async updateOne(

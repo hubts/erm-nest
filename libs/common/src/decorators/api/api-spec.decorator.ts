@@ -30,7 +30,6 @@ export interface ApiSpecOptions {
     summary: string;
     method?: HttpMethod;
     deprecated?: boolean;
-    passThrough?: boolean;
     success?: ApiResSuccessOptions;
     // errors?: ErrorName[];
 }
@@ -62,7 +61,6 @@ export const ApiSpec = <R>(
         deprecated,
         success,
         adminOnly,
-        passThrough,
     } = options;
     // const errors = options.errors ?? [];
 
@@ -105,9 +103,7 @@ export const ApiSpec = <R>(
         /**
          * Set JWT roles
          */
-        if (!passThrough) {
-            JwtRolesAuth(roles)(target, key, descriptor);
-        }
+        JwtRolesAuth(roles)(target, key, descriptor);
         // if (roles?.length) {
         //     // If roles(permissions) are required, set errors related to access.
         //     // 401, 403
@@ -117,7 +113,7 @@ export const ApiSpec = <R>(
         /**
          * Set Admin Secret Guard if adminOnly is true
          */
-        if (adminOnly && !passThrough) {
+        if (adminOnly) {
             UseGuards(AdminSecretGuard)(target, key, descriptor);
             ApiBasicAuth()(target, key, descriptor);
         }

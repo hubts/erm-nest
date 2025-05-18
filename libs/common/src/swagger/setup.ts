@@ -61,6 +61,7 @@ export function setupSwagger(
         explorer: true,
         customCss: style,
         swaggerOptions: {
+            persistAuthorization: true, // Options to persist JWT
             tagsSorter: "alpha",
             // operationsSorter: "alpha",
         },

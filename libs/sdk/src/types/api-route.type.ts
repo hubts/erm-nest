@@ -74,22 +74,12 @@ export type ApiRoute<T, R> = {
  * 특정 도메인 내 APIs에서 공통 응답(CommonResponse)을 제거한 타입
  * 공통 응답 외 실제 로직을 구현하는 Service의 인터페이스를 도출하기 위한 타입입니다.
  * @example "UserController implements UserApi" => "UserService implements ApiToService<UserApi>"
+ * ! MSA 구조에서 API 인터페이스를 유지하며 MessagePattern을 사용하려면 메시지 나열 패턴을 이용해야 합니다.
  */
 export type ApiToService<T> = {
     [K in keyof T]: T[K] extends (
         ...args: infer P
     ) => Promise<CommonResponse<infer R>>
-        ? (...args: P) => Promise<R>
-        : never;
-};
-
-/**
- * 특정 도메인 내 APIs에서 공통 응답(CommonResponse)을 추가하는 타입
- * 구현된 Service의 인터페이스에 CommonResponse를 전부 추가하여, 실제 호출 인터페이스를 도출하기 위한 타입입니다.
- * @example "UserService implements UserApi" => "UserController implements ServiceToApi<UserApi>"
- */
-export type ServiceToApi<T> = {
-    [K in keyof T]: T[K] extends (...args: infer P) => Promise<infer R>
-        ? (...args: P) => Promise<CommonResponse<R>>
+        ? (arg: P) => Promise<R>
         : never;
 };

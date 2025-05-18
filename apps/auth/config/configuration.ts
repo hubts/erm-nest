@@ -14,15 +14,6 @@ export type Configuration = {
         host: string;
         port: number;
         isProduction: boolean;
-        adminSecret: string;
-        endpoint: {
-            external: string;
-            globalPrefix: string;
-        };
-        docs: {
-            path: string;
-            fullPath: string;
-        };
     };
     Jwt: {
         privateKey: string;

@@ -1,24 +1,25 @@
-import { Injectable } from "@nestjs/common";
+import { Controller } from "@nestjs/common";
+import { MessagePattern, Payload } from "@nestjs/microservices";
+import { AuthRoute, IAuthService, UserModel } from "@app/sdk";
 import {
-    AuthToken,
-    IAuthService,
-    LoginInput,
-    RefreshInput,
-    RegisterAsInput,
-    RegisterInput,
-    UserModel,
-} from "@app/sdk";
-import { AuthUserService, AuthTokenService } from "./providers";
+    RegisterInputDto,
+    LoginInputDto,
+    AuthTokenDto,
+    RefreshInputDto,
+    RegisterAsInputDto,
+} from "../../gateway/src/microservices/auth/dto";
+import { AuthTokenService, AuthUserService } from "./providers";
 
-@Injectable()
-export class AuthService implements IAuthService {
+@Controller()
+export class AuthRpcHandler implements IAuthService {
     constructor(
         private readonly userService: AuthUserService,
         private readonly tokenService: AuthTokenService
     ) {}
 
-    // 회원가입
-    async register(input: RegisterInput): Promise<void> {
+    @MessagePattern(AuthRoute.register.cmd)
+    async register(@Payload() args: [input: RegisterInputDto]): Promise<void> {
+        const [input] = args;
         const { email, password, nickname } = input;
         await this.userService.assertDuplicateEmail(email);
         await this.userService.createUser({
@@ -28,8 +29,11 @@ export class AuthService implements IAuthService {
         });
     }
 
-    // 로그인
-    async login(input: LoginInput): Promise<AuthToken> {
+    @MessagePattern(AuthRoute.login.cmd)
+    async login(
+        @Payload() args: [input: LoginInputDto]
+    ): Promise<AuthTokenDto> {
+        const [input] = args;
         const { email, password } = input;
         const user = await this.userService.getLoginUser(email, password);
         const accessToken = this.tokenService.generateAccessToken(user);
@@ -40,13 +44,17 @@ export class AuthService implements IAuthService {
         };
     }
 
-    // 로그아웃
-    async logout(user: UserModel): Promise<void> {
-        await this.tokenService.deleteRefreshTokens(user.id);
+    @MessagePattern(AuthRoute.logout.cmd)
+    async logout(@Payload() args: [requestor: UserModel]): Promise<void> {
+        const [requestor] = args;
+        await this.tokenService.deleteRefreshTokens(requestor.id);
     }
 
-    // 토큰 갱신
-    async refresh(input: RefreshInput): Promise<AuthToken> {
+    @MessagePattern(AuthRoute.refresh.cmd)
+    async refresh(
+        @Payload() args: [input: RefreshInputDto]
+    ): Promise<AuthTokenDto> {
+        const [input] = args;
         const { refreshToken } = input;
         const userId = await this.tokenService.getUserIdByRefreshToken(
             refreshToken
@@ -63,8 +71,11 @@ export class AuthService implements IAuthService {
         return { accessToken, refreshToken: newRefreshToken };
     }
 
-    // 특정 역할 회원가입
-    async registerAs(input: RegisterAsInput): Promise<void> {
+    @MessagePattern(AuthRoute.registerAs.cmd)
+    async registerAs(
+        @Payload() args: [input: RegisterAsInputDto]
+    ): Promise<void> {
+        const [input] = args;
         const { email, password, role } = input;
         await this.userService.assertDuplicateEmail(email);
         await this.userService.createUser({
@@ -74,8 +85,9 @@ export class AuthService implements IAuthService {
         });
     }
 
-    // 인증된 유저 조회
-    async getAuthorizedUser(id: string): Promise<UserModel> {
+    @MessagePattern(AuthRoute.getAuthorizedUser.cmd)
+    async getAuthorizedUser(@Payload() args: [id: string]): Promise<UserModel> {
+        const [id] = args;
         return await this.userService.findOneOrThrowById(id);
     }
 }

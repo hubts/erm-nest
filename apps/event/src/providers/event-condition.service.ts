@@ -23,7 +23,6 @@ export class EventConditionService {
         >
     ): Promise<EventConditionModel> {
         const { fieldName, displayName, type, createdBy } = input;
-        await this.assertDuplicateFieldName(fieldName);
         const eventCondition = await this.eventConditionRepo.create({
             fieldName,
             displayName,

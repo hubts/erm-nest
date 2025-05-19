@@ -76,10 +76,12 @@ export class EventRpcHandler implements IEventService {
         @Payload() payload: [user: UserModel, body: CreateEventConditionInput]
     ): Promise<void> {
         const [user, body] = payload;
+        const { fieldName, displayName, type } = body;
+        await this.eventConditionService.assertDuplicateFieldName(fieldName);
         await this.eventConditionService.create({
-            fieldName: body.fieldName,
-            displayName: body.displayName,
-            type: body.type,
+            fieldName,
+            displayName,
+            type,
             createdBy: user.id,
         });
     }

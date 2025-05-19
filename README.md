@@ -30,8 +30,8 @@
 | Database        | MongoDB                    |
 | Deployment      | Docker, docker-compose     |
 
-> 최신 NestJS `@nestjs/core@^11.1.1` 에서 node 버전 20 이상을 요구합니다.
-> 따라서 Dockerfile에 기재된 것처럼 `node:20.12.2` 이미지를 이용하였습니다.
+> 최신 NestJS `@nestjs/core@^11` 에서 node 버전 20 이상을 요구합니다. [공식](https://docs.nestjs.com/migration-guide#nodejs-v16-and-v18-no-longer-supported)
+> 따라서 Dockerfile에 기재한 것처럼 `node:20.12.2` 이미지를 이용하였습니다.
 
 ## ✅ Implementation Features
 
@@ -41,16 +41,12 @@
 -   [x] Swagger Documentation
 -   [x] Git version management by `commitizen`
 -   [x] Docker-compose Deployment
--   [ ] Interfaces to generate SDK (Github Package)
--   [ ] Custom Error Exception
+-   [ ] Interfaces to generate SDK
 -   [ ] Custom Logging System
--   [ ] HealthChecker & Throttler
-
-더 자세한 설명은 [연결문서](./docs/features.md)를 참고하시기 바랍니다.
 
 ## Architecture
 
-본 프로젝트의 아키텍처에 대해 설명합니다. 루트 디렉토리 기준으로 아래와 같은 구조를 가집니다:
+본 프로젝트의 아키텍처는, 루트 디렉토리 기준으로 아래와 같은 구조를 가집니다:
 
 ```
 / (프로젝트 루트)
@@ -102,19 +98,7 @@
 └── tools/ (관련 백엔드 도구들)
 ```
 
-사용자의 요청(Request)이 처리되는 로직 Journey는 아래와 같습니다:
-
-(Pipe, Interceptor 등 구체적인 흐름 생략)
-
-1. Gateway에 선언된 Controller로 Request가 도착합니다.
-2. Validation 및 유저 조회/검증을 수행합니다.
-3. 해당 마이크로서비스 RpcHandler로 Request가 전달됩니다.
-4. RpcHandler는 각 로직을 담당하는 서비스 Providers를 통해 처리합니다.
-5. 과정에서 Mapping(Mappers), DB처리(Repository, Schema) 등이 발생합니다.
-6. 필요한 경우 주요 도메인 로직(Domain)이 실행됩니다.
-7. 처리완료된 결과가 마이크로서비스 > Gateway를 통해 Response 반환됩니다.
-
-더 자세한 설명은 [연결문서](./docs/architecture.md)를 참고하시기 바랍니다.
+아키텍처 및 유저 요청 처리에 대한 더 자세한 설명은 [연결문서](./docs/architecture.md)를 참고하시기 바랍니다.
 
 ## 🚀 Usage
 
@@ -219,7 +203,7 @@ Swagger Docs는 아래 경로에서 확인할 수 있습니다.
 
 ## 👍 Understanding
 
-본 프로젝트에 구현된 각 도메인 마이크로서비스에 대한 설명입니다. 더 자세한 설명은 [연결문서](./docs/domain.md)를 참고하시기 바랍니다.
+본 프로젝트에 구현된 각 도메인 마이크로서비스에 대한 설명입니다. 각 마이크로서비스에서 이용된 스키마들과 유저 시나리오에 대한 설명은 [연결문서](./docs/domain.md)를 참고하시기 바랍니다.
 
 ### Gateway
 

@@ -1,14 +1,19 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { EventConditionRepository } from "../repositories/event-condition.repository";
 import {
+    CreateEventConditionInput,
     EventConditionGroup,
     EventConditionModel,
     FindAllEventConditionsQuery,
+    Paginated,
+    UserModel,
 } from "@app/sdk";
 import { EventConditionMapper } from "../mapper";
 import { RpcException } from "@nestjs/microservices";
 import { EventConditionValidator } from "../domain/event-condition-validator";
 import { extractLeftOperandIds } from "../domain/extract-left-operand-ids";
+import { FilterQuery } from "mongoose";
+import { EventCondition } from "../schemas";
 
 @Injectable()
 export class EventConditionService {
@@ -16,18 +21,18 @@ export class EventConditionService {
         private readonly eventConditionRepo: EventConditionRepository
     ) {}
 
+    // 이벤트 조건 생성
     async create(
-        input: Pick<
-            EventConditionModel,
-            "fieldName" | "displayName" | "type" | "createdBy"
-        >
+        creator: UserModel,
+        input: CreateEventConditionInput
     ): Promise<EventConditionModel> {
-        const { fieldName, displayName, type, createdBy } = input;
+        const { fieldName, displayName, type } = input;
+        await this.assertDuplicateFieldName(fieldName);
         const eventCondition = await this.eventConditionRepo.create({
             fieldName,
             displayName,
             type,
-            createdBy,
+            createdBy: creator.id,
         });
         return EventConditionMapper.toModel(eventCondition);
     }
@@ -45,6 +50,7 @@ export class EventConditionService {
         return EventConditionMapper.toModel(eventCondition);
     }
 
+    // 이벤트 조건 필드명 중복 검증
     async assertDuplicateFieldName(fieldName: string): Promise<void> {
         const eventCondition = await this.eventConditionRepo.findOne({
             fieldName,
@@ -57,19 +63,32 @@ export class EventConditionService {
         }
     }
 
+    // 이벤트 조건 전체 조회
     async findAll(
         query?: FindAllEventConditionsQuery
-    ): Promise<EventConditionModel[]> {
+    ): Promise<Paginated<EventConditionModel>> {
         const { skip, take, displayName } = query;
-        const eventConditions = await this.eventConditionRepo.findPaginated(
-            {
-                ...(displayName ? { displayName } : {}),
-            },
-            { skip, take }
-        );
-        return eventConditions.map(EventConditionMapper.toModel);
+
+        // Query
+        const filter: FilterQuery<EventCondition> = {};
+        if (displayName) {
+            filter.displayName = { $regex: displayName, $options: "i" };
+        }
+
+        // Find
+        const total = await this.eventConditionRepo.count(filter);
+        const list = await this.eventConditionRepo.findAllPaginated(filter, {
+            skip,
+            take,
+        });
+        return {
+            total,
+            size: list.length,
+            list: list.map(EventConditionMapper.toModel),
+        };
     }
 
+    // IDs 기반 조회
     async findAllByIds(ids: string[]): Promise<EventConditionModel[]> {
         const eventConditions = await this.eventConditionRepo.findAll({
             _id: { $in: ids },
@@ -77,15 +96,17 @@ export class EventConditionService {
         return eventConditions.map(EventConditionMapper.toModel);
     }
 
-    async assertInvalidConditionGroup(condition: EventConditionGroup) {
+    // 이벤트 조건 그룹 검증
+    async assertInvalidConditionGroup(
+        condition: EventConditionGroup
+    ): Promise<void> {
         const eventConditionIds = extractLeftOperandIds(condition);
-        const eventConditions = await this.eventConditionRepo.findAll({
-            _id: { $in: eventConditionIds },
-        });
-        const availableConditions = eventConditions.map(
-            EventConditionMapper.toModel
+        const availableConditions = await this.findAllByIds(eventConditionIds);
+        const isValid = EventConditionValidator.validate(
+            condition,
+            availableConditions
         );
-        if (!EventConditionValidator.validate(condition, availableConditions)) {
+        if (!isValid) {
             throw new RpcException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: "이벤트 조건이 올바르지 않습니다.",

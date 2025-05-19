@@ -1,3 +1,4 @@
+import { DateUtil } from "@app/common";
 import {
     EventConditionGroup,
     EventConditionModel,
@@ -63,6 +64,7 @@ export function checkEventRewardRequest(
             condition => condition.id === set.leftOperand.id
         );
         if (!conditionModel) return false;
+        const type = conditionModel.type;
 
         // fieldName이 일치하는 로깅 필터링
         const relevantLoggings = eventUserLoggings.filter(
@@ -74,30 +76,121 @@ export function checkEventRewardRequest(
 
         // 각 로깅에 대해 조건 검사
         return relevantLoggings.some(logging => {
-            const value = logging.value;
-            const condition = set.rightOperand;
+            const value =
+                type === "number"
+                    ? Number(logging.value)
+                    : type === "date"
+                    ? new Date(logging.value)
+                    : logging.value;
+            const condition =
+                type === "number"
+                    ? Number(set.rightOperand)
+                    : type === "date"
+                    ? new Date(set.rightOperand)
+                    : set.rightOperand;
 
             switch (set.operator) {
                 case "eq":
-                    return value === condition;
+                    if (type === "date") {
+                        // Date 타입인 경우 동일한 날짜인지 확인 (시간 무시)
+                        return DateUtil.isSameDay(
+                            new Date(value),
+                            new Date(condition)
+                        );
+                    } else {
+                        // 숫자/문자열 타입인 경우 동일한 값인지 확인
+                        return value === condition;
+                    }
                 case "neq":
-                    return value !== condition;
+                    if (type === "date") {
+                        // Date 타입인 경우 다른 날짜인지 확인 (시간 무시)
+                        return !DateUtil.isSameDay(
+                            new Date(value),
+                            new Date(condition)
+                        );
+                    } else {
+                        // 숫자/문자열 타입인 경우 다른 값인지 확인
+                        return value !== condition;
+                    }
                 case "gt":
-                    return value > condition;
+                    if (
+                        typeof value === "number" &&
+                        typeof condition === "number"
+                    ) {
+                        // 숫자 타입인 경우 크기 비교
+                        return value > condition;
+                    } else if (type === "date") {
+                        // Date 타입인 경우 이후 날짜인지 확인
+                        return DateUtil.isAfter(
+                            new Date(value),
+                            new Date(condition)
+                        );
+                    } else {
+                        // 문자열 비교 불가능
+                        return false;
+                    }
                 case "lt":
-                    return value < condition;
+                    if (
+                        typeof value === "number" &&
+                        typeof condition === "number"
+                    ) {
+                        // 숫자 타입인 경우 크기 비교
+                        return value < condition;
+                    } else if (type === "date") {
+                        // Date 타입인 경우 이전 날짜인지 확인
+                        return DateUtil.isBefore(
+                            new Date(value),
+                            new Date(condition)
+                        );
+                    } else {
+                        // 문자열 비교 불가능
+                        return false;
+                    }
                 case "gte":
-                    return value >= condition;
+                    if (
+                        typeof value === "number" &&
+                        typeof condition === "number"
+                    ) {
+                        // 숫자 타입인 경우 크기 비교
+                        return value >= condition;
+                    } else if (type === "date") {
+                        // Date 타입인 경우 이후거나 같은 날짜인지 확인
+                        return DateUtil.isAfterOrEqual(
+                            new Date(value),
+                            new Date(condition)
+                        );
+                    } else {
+                        return false;
+                    }
                 case "lte":
-                    return value <= condition;
+                    if (
+                        typeof value === "number" &&
+                        typeof condition === "number"
+                    ) {
+                        // 숫자 타입인 경우 크기 비교
+                        return value <= condition;
+                    } else if (type === "date") {
+                        // Date 타입인 경우 이전이거나 같은 날짜인지 확인
+                        return DateUtil.isBeforeOrEqual(
+                            new Date(value),
+                            new Date(condition)
+                        );
+                    } else {
+                        // 문자열 비교 불가능
+                        return false;
+                    }
                 case "in":
-                    return (
-                        Array.isArray(condition) && condition.includes(value)
-                    );
+                    // 배열 입력 포함 시
+                    // return (
+                    //     Array.isArray(condition) && condition.includes(value)
+                    // );
+                    return false;
                 case "nin":
-                    return (
-                        Array.isArray(condition) && !condition.includes(value)
-                    );
+                    // 배열 입력 포함 시
+                    // return (
+                    //     Array.isArray(condition) && !condition.includes(value)
+                    // );
+                    return false;
                 case "exists":
                     return value !== undefined && value !== null;
                 case "isNull":

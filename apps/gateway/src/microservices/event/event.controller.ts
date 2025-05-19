@@ -73,7 +73,7 @@ export class EventController implements IEventController {
     })
     async findAll(
         @Query() query: FindAllEventsQueryDto
-    ): Promise<CommonResponseDto<EventModel[]>> {
+    ): Promise<CommonResponseDto<PaginatedDto<EventModel>>> {
         const result = await firstValueFrom(
             this.eventClient.send(EventRoute.findAll.cmd, [query])
         );
@@ -114,7 +114,7 @@ export class EventController implements IEventController {
     async findAllEventConditions(
         @Requestor() requestor: UserModel,
         @Query() query: FindAllEventConditionsQueryDto
-    ): Promise<CommonResponseDto<EventConditionModel[]>> {
+    ): Promise<CommonResponseDto<PaginatedDto<EventConditionModel>>> {
         const result = await firstValueFrom(
             this.eventClient.send(EventRoute.findAllEventConditions.cmd, [
                 requestor,
@@ -226,7 +226,7 @@ export class EventController implements IEventController {
     async findAllEventUserLoggings(
         @Requestor() requestor: UserModel,
         @Query() query: FindAllEventUserLoggingsQueryDto
-    ): Promise<CommonResponseDto<EventUserLoggingModel[]>> {
+    ): Promise<CommonResponseDto<PaginatedDto<EventUserLoggingModel>>> {
         const result = await firstValueFrom(
             this.eventClient.send(EventRoute.findAllEventUserLoggings.cmd, [
                 requestor,

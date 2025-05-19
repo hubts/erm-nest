@@ -47,7 +47,7 @@ export interface EventConditionModel {
     id: string;
     fieldName: string;
     displayName: string;
-    type: "string" | "number" | "date";
+    type: "string" | "number" | "date"; // 필요 시 추가 구현
     createdAt: Date;
     createdBy: string;
 }

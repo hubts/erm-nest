@@ -14,6 +14,7 @@ import {
     FindAllEventUserLoggingsQuery,
     FindAllRewardRequestsQuery,
     IEventService,
+    Paginated,
     RejectRewardRequestInput,
     UpdateEventInput,
     UserModel,
@@ -24,7 +25,6 @@ import {
     EventRewardRequestService,
     EventUserLoggingService,
 } from "./providers";
-import { PaginatedDto } from "@app/common";
 
 @Controller()
 export class EventRpcHandler implements IEventService {
@@ -40,7 +40,7 @@ export class EventRpcHandler implements IEventService {
         @Payload() payload: [user: UserModel, body: CreateEventInput]
     ): Promise<void> {
         const [user, body] = payload;
-        await this.eventService.createEvent(user, body);
+        await this.eventService.create(user, body);
     }
 
     @MessagePattern(EventRoute.update.cmd)
@@ -49,12 +49,7 @@ export class EventRpcHandler implements IEventService {
         payload: [user: UserModel, id: string, input: UpdateEventInput]
     ): Promise<void> {
         const [user, id, input] = payload;
-        const event = await this.eventService.findOneOrThrowById(id);
-        await this.eventService.updateEvent({
-            event,
-            input,
-            updatedBy: user.id,
-        });
+        await this.eventService.update(user, id, input);
     }
 
     @MessagePattern(EventRoute.findOne.cmd)
@@ -66,7 +61,7 @@ export class EventRpcHandler implements IEventService {
     @MessagePattern(EventRoute.findAll.cmd)
     async findAll(
         @Payload() payload: [query: FindAllEventsQuery]
-    ): Promise<EventModel[]> {
+    ): Promise<Paginated<EventModel>> {
         const [query] = payload;
         return await this.eventService.findAll(query);
     }
@@ -76,21 +71,14 @@ export class EventRpcHandler implements IEventService {
         @Payload() payload: [user: UserModel, body: CreateEventConditionInput]
     ): Promise<void> {
         const [user, body] = payload;
-        const { fieldName, displayName, type } = body;
-        await this.eventConditionService.assertDuplicateFieldName(fieldName);
-        await this.eventConditionService.create({
-            fieldName,
-            displayName,
-            type,
-            createdBy: user.id,
-        });
+        await this.eventConditionService.create(user, body);
     }
 
     @MessagePattern(EventRoute.findAllEventConditions.cmd)
     async findAllEventConditions(
         @Payload()
         payload: [user: UserModel, query: FindAllEventConditionsQuery]
-    ): Promise<EventConditionModel[]> {
+    ): Promise<Paginated<EventConditionModel>> {
         return await this.eventConditionService.findAll(payload[1]);
     }
 
@@ -99,8 +87,7 @@ export class EventRpcHandler implements IEventService {
         @Payload() payload: [user: UserModel, eventId: string]
     ): Promise<void> {
         const [user, eventId] = payload;
-        const event = await this.eventService.findOneOrThrowById(eventId);
-        await this.eventRewardRequestService.requestReward(user, event);
+        await this.eventRewardRequestService.requestReward(user, eventId);
     }
 
     @MessagePattern(EventRoute.approveRewardRequest.cmd)
@@ -143,7 +130,7 @@ export class EventRpcHandler implements IEventService {
     @MessagePattern(EventRoute.findAllRewardRequests.cmd)
     async findAllRewardRequests(
         @Payload() payload: [user: UserModel, query: FindAllRewardRequestsQuery]
-    ): Promise<PaginatedDto<EventRewardRequestModel>> {
+    ): Promise<Paginated<EventRewardRequestModel>> {
         const [user, query] = payload;
         return await this.eventRewardRequestService.findAllRewardRequests(
             user,
@@ -163,7 +150,7 @@ export class EventRpcHandler implements IEventService {
     async findAllEventUserLoggings(
         @Payload()
         payload: [user: UserModel, query: FindAllEventUserLoggingsQuery]
-    ): Promise<EventUserLoggingModel[]> {
+    ): Promise<Paginated<EventUserLoggingModel>> {
         return await this.eventUserLoggingService.findAll(payload[1]);
     }
 }

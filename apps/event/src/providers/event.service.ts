@@ -4,13 +4,15 @@ import {
     CreateEventInput,
     EventModel,
     FindAllEventsQuery,
+    Paginated,
     UpdateEventInput,
     UserModel,
 } from "@app/sdk";
+import { DateUtil } from "@app/common";
 import { EventConditionService } from "./event-condition.service";
 import { RpcException } from "@nestjs/microservices";
-import { EventMapper } from "../mapper";
-import { generateId } from "@app/common";
+import { EventMapper, RewardMapper } from "../mapper";
+import { FilterQuery } from "mongoose";
 
 @Injectable()
 export class EventService {
@@ -20,7 +22,7 @@ export class EventService {
     ) {}
 
     // 이벤트 생성
-    async createEvent(creator: UserModel, input: CreateEventInput) {
+    async create(creator: UserModel, input: CreateEventInput): Promise<void> {
         const {
             name,
             description,
@@ -29,10 +31,11 @@ export class EventService {
             condition,
             rewardDistributionType,
             rewards,
+            status,
         } = input;
 
         // Check date between
-        if (new Date(startedAt).getTime() >= new Date(endedAt).getTime()) {
+        if (DateUtil.isAfter(startedAt, endedAt)) {
             throw new RpcException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: "이벤트 시작 시간은 종료 시간보다 이전이어야 합니다.",
@@ -43,33 +46,64 @@ export class EventService {
         await this.eventConditionService.assertInvalidConditionGroup(condition);
 
         // Save
-        const event = await this.eventRepo.create({
+        await this.eventRepo.create({
             name,
             description,
             startedAt,
             endedAt,
             condition,
             rewardDistributionType,
+            status,
             createdBy: creator.id,
-            rewards: rewards.map(reward => {
-                return {
-                    id: generateId(),
-                    name: reward.name,
-                    type: reward.type,
-                    amount: reward.amount,
-                };
-            }),
+            rewards: rewards.map(RewardMapper.createToModel),
         });
-        return EventMapper.toModel(event);
+    }
+
+    // Assert if the event is ~
+    assertEventIs(
+        event: EventModel,
+        type: "ongoing" | "inactive" | "ended"
+    ): void {
+        switch (type) {
+            case "ongoing":
+                if (
+                    DateUtil.isBetween(
+                        new Date(),
+                        event.startedAt,
+                        event.endedAt
+                    )
+                ) {
+                    throw new RpcException({
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        message: "이벤트가 진행 중입니다.",
+                    });
+                }
+                break;
+            case "inactive":
+                if (event.status === "inactive") {
+                    throw new RpcException({
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        message: "이벤트가 비활성화되었습니다.",
+                    });
+                }
+                break;
+            case "ended":
+                if (DateUtil.isAfter(new Date(), event.endedAt)) {
+                    throw new RpcException({
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        message: "이벤트가 이미 종료되었습니다.",
+                    });
+                }
+                break;
+        }
     }
 
     // Update the event
-    async updateEvent(data: {
-        event: EventModel;
-        input: UpdateEventInput;
-        updatedBy: string;
-    }) {
-        const { event, input, updatedBy } = data;
+    async update(
+        updater: UserModel,
+        id: string,
+        input: UpdateEventInput
+    ): Promise<void> {
         const {
             name,
             description,
@@ -80,21 +114,11 @@ export class EventService {
             rewards,
         } = input;
 
-        // Check the existing event is ongoing
-        if (event.startedAt < new Date() && event.endedAt > new Date()) {
-            throw new RpcException({
-                statusCode: HttpStatus.BAD_REQUEST,
-                message: "이벤트가 진행 중입니다.",
-            });
-        }
-
-        // Check new date is in-between
-        if (new Date(startedAt).getTime() >= new Date(endedAt).getTime()) {
-            throw new RpcException({
-                statusCode: HttpStatus.BAD_REQUEST,
-                message: "이벤트 시작 시간은 종료 시간보다 이전이어야 합니다.",
-            });
-        }
+        // Check
+        const event = await this.findOneOrThrowById(id);
+        this.assertEventIs(event, "ongoing");
+        this.assertEventIs(event, "inactive");
+        this.assertEventIs(event, "ended");
 
         // Check condition
         if (condition && event.condition !== condition) {
@@ -104,7 +128,7 @@ export class EventService {
         }
 
         // Update
-        const updatedEvent = await this.eventRepo.updateOne(
+        await this.eventRepo.updateOne(
             {
                 _id: event.id,
             },
@@ -117,7 +141,7 @@ export class EventService {
                     condition,
                     rewardDistributionType,
                     rewards,
-                    updatedBy,
+                    updatedBy: updater.id,
                 },
                 $push: {
                     histories: {
@@ -126,7 +150,6 @@ export class EventService {
                 },
             }
         );
-        return EventMapper.toModel(updatedEvent);
     }
 
     // Find one event or throw error
@@ -142,12 +165,12 @@ export class EventService {
     }
 
     // Find all events
-    async findAll(query: FindAllEventsQuery) {
+    async findAll(query: FindAllEventsQuery): Promise<Paginated<EventModel>> {
         const { skip, take, startedAt, endedAt, name, status } = query;
 
         // Check date between
         if (startedAt && endedAt) {
-            if (new Date(startedAt).getTime() >= new Date(endedAt).getTime()) {
+            if (DateUtil.isAfter(startedAt, endedAt)) {
                 throw new RpcException({
                     statusCode: HttpStatus.BAD_REQUEST,
                     message: "시작 시간이 종료 시간보다 이전이어야 합니다.",
@@ -155,21 +178,32 @@ export class EventService {
             }
         }
 
-        const events = await this.eventRepo.findPaginated(
-            {
-                ...(startedAt
-                    ? {
-                          startedAt: {
-                              $gte: startedAt,
-                          },
-                      }
-                    : {}),
-                ...(endedAt ? { endedAt: { $lte: endedAt } } : {}),
-                ...(name ? { name } : {}),
-                ...(status ? { status } : {}),
-            },
-            { skip, take }
-        );
-        return events.map(EventMapper.toModel);
+        // Query
+        const filter: FilterQuery<Event> = {};
+        if (startedAt) {
+            filter.startedAt = { $gte: startedAt };
+        }
+        if (endedAt) {
+            filter.endedAt = { $lte: endedAt };
+        }
+        if (name) {
+            filter.name = { $regex: name, $options: "i" };
+        }
+        if (status) {
+            filter.status = status;
+        }
+
+        // Find
+        const total = await this.eventRepo.count(filter);
+        const list = await this.eventRepo.findAllPaginated(filter, {
+            skip,
+            take,
+        });
+
+        return {
+            total,
+            size: list.length,
+            list: list.map(EventMapper.toModel),
+        };
     }
 }

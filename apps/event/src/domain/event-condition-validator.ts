@@ -7,6 +7,7 @@ import {
 } from "@app/sdk";
 
 export class EventConditionValidator {
+    // Validation 메인 함수
     static validate(
         group: any,
         availableConditions: EventConditionModel[]

@@ -2,9 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { EventUserLoggingRepository } from "../repositories";
 import {
     CreateEventUserLoggingInput,
+    EventUserLoggingModel,
     FindAllEventUserLoggingsQuery,
+    Paginated,
 } from "@app/sdk";
 import { EventUserLoggingMapper } from "../mapper";
+import { EventUserLogging } from "../schemas";
+import { FilterQuery } from "mongoose";
 
 @Injectable()
 export class EventUserLoggingService {
@@ -12,6 +16,7 @@ export class EventUserLoggingService {
         private readonly eventUserLoggingRepo: EventUserLoggingRepository
     ) {}
 
+    // Create event user logging (called by external services, such as login, register, friend invite, etc.)
     async create(input: CreateEventUserLoggingInput) {
         const { userId, fieldName, value } = input;
         const eventUserLogging = await this.eventUserLoggingRepo.create({
@@ -22,7 +27,10 @@ export class EventUserLoggingService {
         return EventUserLoggingMapper.toModel(eventUserLogging);
     }
 
-    async findAll(query: FindAllEventUserLoggingsQuery) {
+    // Find all event user loggings
+    async findAll(
+        query: FindAllEventUserLoggingsQuery
+    ): Promise<Paginated<EventUserLoggingModel>> {
         const {
             skip,
             take,
@@ -32,18 +40,35 @@ export class EventUserLoggingService {
             fieldName,
             fieldNames,
         } = query;
-        const eventUserLoggings = await this.eventUserLoggingRepo.findPaginated(
-            {
-                ...(startedAt ? { startedAt: { $gte: startedAt } } : {}),
-                ...(endedAt ? { endedAt: { $lte: endedAt } } : {}),
-                ...(userId ? { userId } : {}),
-                ...(fieldName ? { fieldName } : {}),
-                ...(fieldNames && fieldNames.length
-                    ? { fieldName: { $in: fieldNames } }
-                    : {}),
-            },
-            { skip, take }
-        );
-        return eventUserLoggings.map(EventUserLoggingMapper.toModel);
+
+        // Query
+        const filter: FilterQuery<EventUserLogging> = {};
+        if (startedAt) {
+            filter.startedAt = { $gte: startedAt };
+        }
+        if (endedAt) {
+            filter.endedAt = { $lte: endedAt };
+        }
+        if (userId) {
+            filter.userId = userId;
+        }
+        if (fieldName) {
+            filter.fieldName = fieldName;
+        }
+        if (fieldNames && fieldNames.length) {
+            filter.fieldName = { $in: fieldNames };
+        }
+
+        // Find
+        const total = await this.eventUserLoggingRepo.count(filter);
+        const list = await this.eventUserLoggingRepo.findAllPaginated(filter, {
+            skip,
+            take,
+        });
+        return {
+            total,
+            size: list.length,
+            list: list.map(EventUserLoggingMapper.toModel),
+        };
     }
 }

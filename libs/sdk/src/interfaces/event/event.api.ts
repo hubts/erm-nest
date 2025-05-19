@@ -34,7 +34,9 @@ export interface EventApi<
     // Find one
     findOne(id: string): Promise<CommonResponse<EventModel>>;
     // Find all (via query)
-    findAll(query: FindAllEventsQuery): Promise<CommonResponse<EventModel[]>>;
+    findAll(
+        query: FindAllEventsQuery
+    ): Promise<CommonResponse<Paginated<EventModel>>>;
 
     /**
      * Event condition
@@ -48,7 +50,7 @@ export interface EventApi<
     findAllEventConditions(
         requestor: R,
         query: FindAllEventConditionsQuery
-    ): Promise<CommonResponse<EventConditionModel[]>>;
+    ): Promise<CommonResponse<Paginated<EventConditionModel>>>;
 
     /**
      * Reward Requests
@@ -88,7 +90,7 @@ export interface EventApi<
     findAllEventUserLoggings(
         requestor: R,
         query: FindAllEventUserLoggingsQuery
-    ): Promise<CommonResponse<EventUserLoggingModel[]>>;
+    ): Promise<CommonResponse<Paginated<EventUserLoggingModel>>>;
 }
 export type IEventController = EventApi<UserModel>;
 export type IEventService = ApiToService<EventApi<UserModel>>;
@@ -101,6 +103,7 @@ export interface CreateEventInput
         | "description"
         | "startedAt"
         | "endedAt"
+        | "status"
         | "condition"
         | "rewardDistributionType"
     > {

@@ -75,16 +75,12 @@ Controller는 마이크로서비스들로 요청을 전달하고, 해당 처리�
 
 ### RPC Handler
 
-RPC Handler는 비즈니스 로직들을 일련적으로 수행하는, 비즈니스 로직 묶음입니다.
+RPC Handler는 Controller와 같이 `@MessagePattern` 을 기반으로 전달된 요청들을 처리하고, 비즈니스 로직을 처리하는 서비스들을 호출합니다. TCP 기반 마이크로서비스로 구현된 `Auth`, `Event` 는 각 RPC Handler를 구현하고 있으며, 앞선 Gateway Controller 에서 전달한 Payload를 기반으로 비즈니스 로직을 호출합니다.
 
-TCP 기반 마이크로서비스로 구현된 `Auth`, `Event` 는 각 RPC Handler를 구현하고 있으며, 앞선 Gateway Controller 에서 전달한 Payload를 기반으로 비즈니스 로직을 처리합니다.
-
-마이크로서비스들의 각 RPC Handler는 또한 앞서 선언한 `Api` 인터페이스를 기반으로 인터페이스를 구현할 수 있기 때문에, 미리 정의된 인터페이스를 그대로 이용할 수 있습니다.
-
-그리고 실질적인 비즈니스 로직은 이어지는 Providers 영역에서 구현됩니다.
+마이크로서비스들의 각 RPC Handler는 또한 앞서 선언한 `Api` 인터페이스를 기반으로 인터페이스를 구현할 수 있기 때문에, 미리 정의된 인터페이스를 그대로 이용할 수 있습니다. 그리고 실질적인 비즈니스 로직은 이어지는 Providers 영역에서 구현됩니다.
 
 ### Providers
 
 Providers는 가능한 단일 기능의 비즈니스 로직을 처리합니다. 예를 들어, 검사, CRUD, 데이터 변환 등 직접적인 모델에 대한 처리 및 Repository, Schema(Entity) 등을 다루는 역할을 수행합니다.
 
-각 Provider끼리 서로에게 구현된 단일 비즈니스 로직을 호출하거나, 관련된 별도 Domain 기능들을 호출하여 하나의 메소드가 하나의 로직을 처리하도록 합니다.
+각 Provider끼리 서로에게 구현된 단일 비즈니스 로직을 호출하거나, 관련된 별도 Domain 기능들을 호출하여 가능한 하나의 메소드가 하나의 로직을 처리하도록 합니다.

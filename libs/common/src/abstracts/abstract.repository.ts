@@ -20,6 +20,14 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
         return document ?? null;
     }
 
+    async findRecentOne(filterQuery: FilterQuery<T>): Promise<T | null> {
+        const document = await this.model
+            .findOne(filterQuery)
+            .sort({ _id: -1 })
+            .exec();
+        return document ?? null;
+    }
+
     async findOneOrThrow(filterQuery: FilterQuery<T>): Promise<T> {
         const document = await this.findOne(filterQuery);
         if (!document) {
@@ -39,7 +47,7 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
         return this.model.find(filterQuery).exec();
     }
 
-    async findPaginated(
+    async findAllPaginated(
         filterQuery: FilterQuery<T>,
         options: PaginationQuery
     ): Promise<T[]> {

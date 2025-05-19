@@ -1,13 +1,13 @@
 {
-    "name": "@hubts/event-reward-management-sdk",
-    "version": "0.0.1",
-    "description": "SDK for event-reward-management",
+    "name": "@hubts/erm-nest-sdk",
+    "version": "0.0.2",
+    "description": "NestJS SDK for Event Reward Management",
     "author": "hubts",
     "private": false,
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/hubts/event-reward-management.git"
+        "url": "https://github.com/hubts/erm-nest.git"
     },
     "files": [
         "dist"

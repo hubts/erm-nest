@@ -14,12 +14,12 @@ async function bootstrap() {
             abortOnError: true,
         }
     );
-    const logger = new Logger("Event");
+    const logger = new Logger("Gateway");
 
     try {
         const serverConfig = app.get(ServerConfig.KEY);
         const packageJson = require("../../../package.json");
-        const applicationName = `${packageJson.name}.Auth`;
+        const applicationName = `${packageJson.name}`;
 
         // CORS
         app.enableCors({

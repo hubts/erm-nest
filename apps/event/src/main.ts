@@ -12,7 +12,7 @@ async function bootstrap() {
         );
         const serverConfig = appContext.get(ServerConfig.KEY);
         const packageJson = require("../../../package.json");
-        const applicationName = `${packageJson.name}.Event`;
+        const applicationName = `${packageJson.name}.event`;
 
         const app = await NestFactory.createMicroservice<MicroserviceOptions>(
             EventModule,
@@ -27,7 +27,7 @@ async function bootstrap() {
         );
 
         // Start log
-        const logger = new Logger("Auth");
+        const logger = new Logger("Event");
         let log = `Application [ ${applicationName}:${packageJson.version} ] is successfully started\n`;
         log += `< Information >\n`;
         log += `🌏 Env        : ${serverConfig.env}\n`;

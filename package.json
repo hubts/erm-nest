@@ -1,6 +1,6 @@
 {
     "name": "@hubts/erm-nest",
-    "version": "0.0.2-14",
+    "version": "0.0.2-15",
     "description": "REST API for Event Reward Management",
     "author": "@hubts",
     "private": false,
@@ -33,7 +33,7 @@
         "sdk": "cd libs/sdk && yarn publish",
         "sdk:link": "cd libs/sdk && yarn build && yarn link && cd .. && yarn link $npm_package_name-sdk",
         "#----------------Docker--------------------#": "Docker",
-        "docker:compose": "docker compose up -f docker-compose.yml up -d",
+        "docker:compose": "docker compose -f docker-compose.yml up -d",
         "docker:compose:build": "docker compose -f docker-compose.yml up -d --build",
         "docker:compose:log": "docker compose logs -f auth event gateway | cat"
     },

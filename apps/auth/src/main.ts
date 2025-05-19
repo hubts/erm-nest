@@ -12,7 +12,7 @@ async function bootstrap() {
         );
         const serverConfig = appContext.get(ServerConfig.KEY);
         const packageJson = require("../../../package.json");
-        const applicationName = `${packageJson.name}.Auth`;
+        const applicationName = `${packageJson.name}.auth`;
 
         const app = await NestFactory.createMicroservice<MicroserviceOptions>(
             AuthModule,

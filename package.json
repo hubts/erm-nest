@@ -1,13 +1,13 @@
 {
-    "name": "event-reward-management",
-    "version": "0.0.2-11",
+    "name": "@hubts/erm-nest",
+    "version": "0.0.2-12",
     "description": "REST API for Event Reward Management",
     "author": "@hubts",
-    "private": true,
+    "private": false,
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/hubts/event-reward-management.git"
+        "url": "https://github.com/hubts/erm-nest.git"
     },
     "scripts": {
         "build": "nest build",

@@ -3,7 +3,7 @@ import {
     CommonResponse,
     Paginated,
     PaginationQuery,
-} from "@app/sdk";
+} from "../../types";
 import { UserModel } from "../auth";
 import {
     EventConditionModel,

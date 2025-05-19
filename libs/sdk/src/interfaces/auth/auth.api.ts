@@ -1,5 +1,5 @@
+import { CommonResponse, ApiToService } from "../../types";
 import { UserModel, UserRole } from "./auth.model";
-import { ApiToService, CommonResponse } from "@app/sdk";
 
 /**
  * 인증 API 인터페이스

@@ -1,4 +1,4 @@
-import { ApiRoute } from "@app/sdk";
+import { ApiRoute } from "../../types";
 import { AuthApi } from "./auth.api";
 import { UserRole, UserRoles } from "./auth.model";
 

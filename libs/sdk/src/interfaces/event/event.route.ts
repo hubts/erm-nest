@@ -1,4 +1,5 @@
-import { ApiRoute, UserRole } from "@app/sdk";
+import { ApiRoute } from "../../types";
+import { UserRole } from "../auth";
 import { EventApi } from "./event.api";
 
 /**

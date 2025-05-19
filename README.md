@@ -19,19 +19,18 @@
 
 ## ⚒️ Technical Stacks
 
-| Key             | Version / Tool             |
-| --------------- | -------------------------- |
-| Node.js         | ~~18 (Fixed)~~ (하기 참조) |
-| NestJS          | Recent (^11.1.1)           |
-| Language        | TypeScript                 |
-| Architecture    | Microservices(Monorepo)    |
-| Package Manager | yarn                       |
-| Documentation   | Swagger                    |
-| Database        | MongoDB                    |
-| Deployment      | Docker, docker-compose     |
+| Key             | Version / Tool                |
+| --------------- | ----------------------------- |
+| Node.js         | ~~18 (Fixed)~~ 😢 (아래 참조) |
+| NestJS          | Recent (^11.1.1)              |
+| Language        | TypeScript                    |
+| Architecture    | Microservices (monorepo)      |
+| Package Manager | yarn                          |
+| Documentation   | Swagger                       |
+| Database        | MongoDB                       |
+| Deployment      | Docker, docker-compose        |
 
-> 최신 NestJS `@nestjs/core@^11` 에서 node 버전 20 이상을 요구합니다. [공식](https://docs.nestjs.com/migration-guide#nodejs-v16-and-v18-no-longer-supported)
-> 따라서 Dockerfile에 기재한 것처럼 `node:20.12.2` 이미지를 이용하였습니다.
+> 최신 NestJS `@nestjs/core@^11` 에서 [node 버전 20 이상을 요구](https://docs.nestjs.com/migration-guide#nodejs-v16-and-v18-no-longer-supported)합니다. 이에 Dockerfile에 기재한 것과 같이 `node:20.12.2` 이미지를 이용하였습니다.
 
 ## ✅ Implementation Features
 
@@ -41,7 +40,7 @@
 -   [x] Swagger Documentation
 -   [x] Git version management by `commitizen`
 -   [x] Docker-compose Deployment
--   [ ] Interfaces to generate SDK
+-   [x] Interfaces to generate SDK
 -   [ ] Custom Logging System
 
 ## Architecture

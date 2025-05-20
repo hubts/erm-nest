@@ -2,7 +2,12 @@ import { Body, Controller, Inject } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { ClientProxy } from "@nestjs/microservices";
 import { firstValueFrom } from "rxjs";
-import { AuthRoute, IAuthController, UserModel } from "@app/sdk";
+import {
+    AuthRoute,
+    IAuthController,
+    SimpleUserModel,
+    UserModel,
+} from "@app/sdk";
 import {
     asSuccessResponse,
     CommonResponseDto,
@@ -36,11 +41,11 @@ export class AuthController
     })
     async register(
         @Body() input: RegisterInputDto
-    ): Promise<CommonResponseDto<void>> {
-        await firstValueFrom(
+    ): Promise<CommonResponseDto<SimpleUserModel>> {
+        const result = await firstValueFrom(
             this.authClient.send(AuthRoute.register.cmd, [input])
         );
-        return asSuccessResponse("회원가입에 성공");
+        return asSuccessResponse("회원가입에 성공", result);
     }
 
     @Route.Post(AuthRoute.login, {

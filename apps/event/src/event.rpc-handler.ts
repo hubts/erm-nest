@@ -87,6 +87,7 @@ export class EventRpcHandler implements IEventService {
         @Payload() payload: [user: UserModel, eventId: string]
     ): Promise<void> {
         const [user, eventId] = payload;
+        console.log("user", user);
         await this.eventRewardRequestService.requestReward(user, eventId);
     }
 
@@ -122,8 +123,10 @@ export class EventRpcHandler implements IEventService {
     async findOneRewardRequest(
         @Payload() payload: [user: UserModel, rewardRequestId: string]
     ): Promise<EventRewardRequestModel> {
+        const [user, rewardRequestId] = payload;
         return await this.eventRewardRequestService.findOneOrThrowById(
-            payload[1]
+            user,
+            rewardRequestId
         );
     }
 

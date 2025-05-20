@@ -22,6 +22,15 @@ export interface UserModel {
     deletedAt: Date | null;
 }
 
+// 간단 유저 모델
+export interface SimpleUserModel {
+    id: string;
+    email: string;
+    nickname: string;
+    role: UserRole;
+    joinedAt: Date;
+}
+
 // 유저 상태 정의
 export const UserStatus = {
     ACTIVE: "ACTIVE",

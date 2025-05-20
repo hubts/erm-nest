@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { hashSync, compareSync } from "bcrypt";
-import { UserModel, UserRole } from "@app/sdk";
+import { SimpleUserModel, UserModel, UserRole } from "@app/sdk";
 import { UserRepository } from "../repositories/user.repository";
 import { UserMapper } from "../mapper/user.mapper";
 import { RpcException } from "@nestjs/microservices";
@@ -36,7 +36,7 @@ export class AuthUserService {
         password: string;
         role?: UserRole;
         nickname?: string;
-    }): Promise<UserModel> {
+    }): Promise<SimpleUserModel> {
         const { email, password, role, nickname } = data;
         const user = await this.userRepo.create({
             email,
@@ -44,7 +44,7 @@ export class AuthUserService {
             nickname: nickname ?? `${role ?? UserRole.USER}-${generateId()}`,
             ...(role && { role }),
         });
-        return UserMapper.toModel(user);
+        return UserMapper.toSimpleModel(user);
     }
 
     async getLoginUser(email: string, password: string): Promise<UserModel> {

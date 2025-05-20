@@ -1,5 +1,5 @@
 import { CommonResponse, ApiToService } from "../../types";
-import { UserModel, UserRole } from "./auth.model";
+import { SimpleUserModel, UserModel, UserRole } from "./auth.model";
 
 /**
  * 인증 API 인터페이스
@@ -7,7 +7,7 @@ import { UserModel, UserRole } from "./auth.model";
  */
 export interface AuthApi<R extends UserModel | string | undefined = undefined> {
     // Register
-    register(input: RegisterInput): Promise<CommonResponse>;
+    register(input: RegisterInput): Promise<CommonResponse<SimpleUserModel>>;
     // Login
     login(input: LoginInput): Promise<CommonResponse<AuthToken>>;
     // Logout

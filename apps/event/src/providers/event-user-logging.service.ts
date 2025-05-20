@@ -43,11 +43,15 @@ export class EventUserLoggingService {
 
         // Query
         const filter: FilterQuery<EventUserLogging> = {};
-        if (startedAt) {
-            filter.startedAt = { $gte: startedAt };
-        }
-        if (endedAt) {
-            filter.endedAt = { $lte: endedAt };
+        if (startedAt && endedAt) {
+            filter.createdAt = {
+                $gte: new Date(startedAt),
+                $lte: new Date(endedAt),
+            };
+        } else if (startedAt) {
+            filter.createdAt = { $gte: new Date(startedAt) };
+        } else if (endedAt) {
+            filter.createdAt = { $lte: new Date(endedAt) };
         }
         if (userId) {
             filter.userId = userId;
@@ -58,6 +62,7 @@ export class EventUserLoggingService {
         if (fieldNames && fieldNames.length) {
             filter.fieldName = { $in: fieldNames };
         }
+        console.log("filter", filter);
 
         // Find
         const total = await this.eventUserLoggingRepo.count(filter);

@@ -6,6 +6,11 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { SwaggerThemeNameEnum } from "swagger-themes";
 import { ServerConfig } from "../config/server.config";
 import { GatewayModule } from "./gateway.module";
+import { json } from "body-parser";
+import helmet from "helmet";
+import compression from "compression";
+import morgan from "morgan";
+import { Configuration } from "../config/configuration";
 
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(
@@ -17,7 +22,7 @@ async function bootstrap() {
     const logger = new Logger("Gateway");
 
     try {
-        const serverConfig = app.get(ServerConfig.KEY);
+        const serverConfig = app.get<Configuration["Server"]>(ServerConfig.KEY);
         const packageJson = require("../../../package.json");
         const applicationName = `${packageJson.name}`;
 
@@ -46,6 +51,16 @@ async function bootstrap() {
 
         // API global prefix
         app.setGlobalPrefix(serverConfig.endpoint.globalPrefix);
+
+        // Payload limit
+        app.use(json({ limit: "10mb" }));
+
+        // Secure HTTP and Compression
+        app.use(helmet());
+        app.use(compression());
+
+        // Logging Middleware
+        app.use(morgan(serverConfig.isProduction ? "combined" : "dev"));
 
         /**
          * Start

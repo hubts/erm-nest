@@ -98,7 +98,10 @@ export class EventService {
         }
     }
 
-    // Update the event
+    /**
+     * 이벤트 수정
+     * 이벤트는 이미 종료된 상태가 아니라면 수정할 수 있다.
+     */
     async update(
         updater: UserModel,
         id: string,
@@ -112,12 +115,11 @@ export class EventService {
             condition,
             rewardDistributionType,
             rewards,
+            status,
         } = input;
 
         // Check
         const event = await this.findOneOrThrowById(id);
-        this.assertEventIs(event, "ongoing");
-        this.assertEventIs(event, "inactive");
         this.assertEventIs(event, "ended");
 
         // Check condition
@@ -141,6 +143,7 @@ export class EventService {
                     condition,
                     rewardDistributionType,
                     rewards,
+                    status,
                     updatedBy: updater.id,
                 },
                 $push: {

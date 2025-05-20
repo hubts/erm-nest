@@ -41,7 +41,6 @@
 -   [x] Git version management by `commitizen`
 -   [x] Docker-compose Deployment
 -   [x] Interfaces to generate SDK
--   [ ] Custom Logging System
 
 ## Architecture
 
@@ -116,6 +115,8 @@ $ yarn mongo:run
 -   `./tools/mongo` 경로에 있는 `docker-compose.yaml` 를 기반으로, MongoDB, Mongo-Express 컨테이너가 각각 실행됩니다.
 -   별도로 환경변수를 설정하지 않았다면, `./tools/mongo/.env.example` 을 기반으로 `./tools/mongo/.env` 파일이 자동 생성되며 컨테이너가 실행됩니다.
 -   DB name `event-reward`를 생성하고 접근 유저를 생성하는 `./tools/mongo/init/init-mongo.js` 파일이 전달되어 자동 실행됩니다.
+
+올바르게 실행되었다면 컨테이너들이 올라가 있으며, Mongo-Express 를 로컬 브라우저에서 접속할 수 있습니다. (http://localhost:8081)[http://localhost:8081]
 
 만약, Mongo DB에 직접 접근할 수 있는 Mongosh를 사용하고 싶은 경우 아래 명령어를 이용합니다:
 
@@ -199,6 +200,20 @@ Gateway 서버로 접근하려면 아래 경로를 이용합니다.
 Swagger Docs는 아래 경로에서 확인할 수 있습니다.
 
 -   (로컬기준) http://localhost:8000/api/docs
+
+**5. E2E 테스트**
+
+`docker-compose` 를 통해 컨테이너가 모두 실행되었다면, 유저 시나리오를 확인할 수 있는 E2E 테스트를 수행할 수 있습니다. E2E 테스트는 로컬에서 실행되며, 실행된 컨테이너에 호출을 전달하여 수행합니다.
+
+`./test/.env.test` 에는 Gateway의 엔드포인트에 맞는 환경변수가 설정되어 있습니다.
+
+> 이벤트 조건 키 값이 겹치거나 조회하는 목록이 겹칠 수 있기 때문에, 최초 데이터베이스가 초기화된 상태에서 실행하는 것을 권장합니다.
+
+루트 디렉토리에서 아래 명령어를 실행합니다:
+
+```bash
+$ yarn test:e2e
+```
 
 ## 👍 Understanding
 

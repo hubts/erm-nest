@@ -26,12 +26,16 @@ export class EventRewardRequestService {
         private readonly eventService: EventService
     ) {}
 
-    // Request reward
+    /**
+     * 이벤트 보상 요청
+     * 이벤트 보상 요청은 언제든지 수행할 수 있다.
+     * 단, 이벤트가 비활성화된 상태이면 요청할 수 없다.
+     */
     async requestReward(user: UserModel, eventId: string): Promise<void> {
+        console.log("userId", user.id);
         // 이벤트 조회
         const event = await this.eventService.findOneOrThrowById(eventId);
         this.eventService.assertEventIs(event, "inactive");
-        // this.eventService.assertEventIs(event, "ended"); // 이벤트 종료 시 보상 요청할 수 없는 경우
 
         // 최신 중복 보상 요청 확인
         const existingRewardRequest = await this.eventRewardRequestRepo.findOne(
@@ -62,9 +66,10 @@ export class EventRewardRequestService {
             take: -1,
             userId: user.id,
             fieldNames: eventConditionFieldNames,
-            startedAt: event.startedAt,
-            endedAt: event.endedAt,
+            // startedAt: event.startedAt,
+            // endedAt: event.endedAt,
         });
+        console.log(eventUserLoggings);
         const isSatisfied = checkEventRewardRequest(
             event.condition,
             eventConditions,
@@ -77,7 +82,7 @@ export class EventRewardRequestService {
             : event.rewardDistributionType === "manual"
             ? "pending"
             : "approved";
-        await this.eventRewardRequestRepo.create({
+        const created = await this.eventRewardRequestRepo.create({
             event: new Types.ObjectId(event.id),
             user: new Types.ObjectId(user.id),
             status,
@@ -85,6 +90,7 @@ export class EventRewardRequestService {
             receivedRewards: status === "approved" ? event.rewards : [],
             eventUserLoggings: eventUserLoggings.list,
         });
+        console.log("created", created);
     }
 
     // Approve reward request
@@ -92,7 +98,10 @@ export class EventRewardRequestService {
         user: UserModel,
         rewardRequestId: string
     ): Promise<void> {
-        const rewardRequest = await this.findOneOrThrowById(rewardRequestId);
+        const rewardRequest = await this.findOneOrThrowById(
+            user,
+            rewardRequestId
+        );
         if (rewardRequest.status !== "pending") {
             throw new RpcException({
                 statusCode: HttpStatus.BAD_REQUEST,
@@ -123,7 +132,10 @@ export class EventRewardRequestService {
     ): Promise<void> {
         const { reason } = input;
         console.log(rewardRequestId);
-        const rewardRequest = await this.findOneOrThrowById(rewardRequestId);
+        const rewardRequest = await this.findOneOrThrowById(
+            user,
+            rewardRequestId
+        );
         if (rewardRequest.status !== "pending") {
             throw new RpcException({
                 statusCode: HttpStatus.BAD_REQUEST,
@@ -144,7 +156,7 @@ export class EventRewardRequestService {
     }
 
     // Find one reward request
-    async findOneOrThrowById(id: string) {
+    async findOneOrThrowById(user: UserModel, id: string) {
         const eventRewardRequest = await this.eventRewardRequestRepo.findOne({
             _id: id,
         });
@@ -152,6 +164,14 @@ export class EventRewardRequestService {
             throw new RpcException({
                 statusCode: HttpStatus.NOT_FOUND,
                 message: "해당 이벤트 보상 요청을 찾을 수 없습니다.",
+            });
+        } else if (
+            user.role === "USER" &&
+            eventRewardRequest.user._id.toString() !== user.id
+        ) {
+            throw new RpcException({
+                statusCode: HttpStatus.NOT_FOUND,
+                message: "해당 이벤트 보상 요청에 접근할 수 없습니다.",
             });
         }
         return EventRewardRequestMapper.toModel(eventRewardRequest);

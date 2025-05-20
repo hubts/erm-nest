@@ -1,6 +1,6 @@
 import { Controller } from "@nestjs/common";
 import { MessagePattern, Payload } from "@nestjs/microservices";
-import { AuthRoute, IAuthService, UserModel } from "@app/sdk";
+import { AuthRoute, IAuthService, SimpleUserModel, UserModel } from "@app/sdk";
 import {
     RegisterInputDto,
     LoginInputDto,
@@ -18,11 +18,13 @@ export class AuthRpcHandler implements IAuthService {
     ) {}
 
     @MessagePattern(AuthRoute.register.cmd)
-    async register(@Payload() args: [input: RegisterInputDto]): Promise<void> {
+    async register(
+        @Payload() args: [input: RegisterInputDto]
+    ): Promise<SimpleUserModel> {
         const [input] = args;
         const { email, password, nickname } = input;
         await this.userService.assertDuplicateEmail(email);
-        await this.userService.createUser({
+        return await this.userService.createUser({
             email,
             password,
             nickname,

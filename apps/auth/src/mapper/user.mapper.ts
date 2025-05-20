@@ -1,4 +1,4 @@
-import { UserModel } from "@app/sdk";
+import { SimpleUserModel, UserModel } from "@app/sdk";
 import { User } from "../schemas/user.schema";
 
 export const UserMapper = {
@@ -12,6 +12,15 @@ export const UserMapper = {
             role: user.role,
             joinedAt: user.createdAt,
             deletedAt: user.checkpoint?.deletedAt ?? null,
+        };
+    },
+    toSimpleModel: (user: User): SimpleUserModel => {
+        return {
+            id: user._id.toString(),
+            email: user.email,
+            nickname: user.nickname,
+            role: user.role,
+            joinedAt: user.createdAt,
         };
     },
 };

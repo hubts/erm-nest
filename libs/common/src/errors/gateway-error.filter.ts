@@ -4,12 +4,12 @@ import {
     ExceptionFilter,
     HttpException,
     HttpStatus,
+    InternalServerErrorException,
     Logger,
     ServiceUnavailableException,
 } from "@nestjs/common";
 import { Request, Response } from "express";
 import { asErrorResponse } from "../dto";
-import { convertRpcException } from "./convert-rpc-exception";
 
 @Catch()
 export class GatewayErrorFilter implements ExceptionFilter {
@@ -28,27 +28,37 @@ export class GatewayErrorFilter implements ExceptionFilter {
                 message: "서비스 연결에 실패하였습니다.",
                 cause: error,
             });
+        } else if (!(error instanceof HttpException)) {
+            if (
+                typeof error === "object" &&
+                ("status" in error || "statusCode" in error)
+            ) {
+                error = new HttpException(
+                    error.message,
+                    error["status"] || error["statusCode"],
+                    {
+                        cause: error,
+                    }
+                );
+            } else {
+                // Unknown Error will be 500
+                error = new InternalServerErrorException(error);
+            }
         }
-
-        // RPC to HttpException
-        const normalizedError = convertRpcException(error);
-        const status =
-            normalizedError instanceof HttpException
-                ? normalizedError.getStatus()
-                : HttpStatus.INTERNAL_SERVER_ERROR;
+        // Now, error is HttpException
+        const normalizedError = error as HttpException;
+        const status = normalizedError.getStatus();
         const message = normalizedError.message;
         const stack = normalizedError.stack;
         const cause = normalizedError.cause;
 
         this.logger.error(
-            JSON.stringify(
-                {
-                    error: normalizedError,
-                    path,
-                },
-                null,
-                4
-            )
+            JSON.stringify({
+                status,
+                message,
+            }),
+            stack,
+            path
         );
 
         // Return

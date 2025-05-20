@@ -32,7 +32,6 @@ export class EventRewardRequestService {
      * 단, 이벤트가 비활성화된 상태이면 요청할 수 없다.
      */
     async requestReward(user: UserModel, eventId: string): Promise<void> {
-        console.log("userId", user.id);
         // 이벤트 조회
         const event = await this.eventService.findOneOrThrowById(eventId);
         this.eventService.assertEventIs(event, "inactive");
@@ -66,10 +65,9 @@ export class EventRewardRequestService {
             take: -1,
             userId: user.id,
             fieldNames: eventConditionFieldNames,
-            // startedAt: event.startedAt,
-            // endedAt: event.endedAt,
+            startedAt: event.startedAt,
+            endedAt: event.endedAt,
         });
-        console.log(eventUserLoggings);
         const isSatisfied = checkEventRewardRequest(
             event.condition,
             eventConditions,
@@ -82,7 +80,7 @@ export class EventRewardRequestService {
             : event.rewardDistributionType === "manual"
             ? "pending"
             : "approved";
-        const created = await this.eventRewardRequestRepo.create({
+        await this.eventRewardRequestRepo.create({
             event: new Types.ObjectId(event.id),
             user: new Types.ObjectId(user.id),
             status,
@@ -90,7 +88,6 @@ export class EventRewardRequestService {
             receivedRewards: status === "approved" ? event.rewards : [],
             eventUserLoggings: eventUserLoggings.list,
         });
-        console.log("created", created);
     }
 
     // Approve reward request
@@ -131,7 +128,6 @@ export class EventRewardRequestService {
         input: RejectRewardRequestInput
     ): Promise<void> {
         const { reason } = input;
-        console.log(rewardRequestId);
         const rewardRequest = await this.findOneOrThrowById(
             user,
             rewardRequestId

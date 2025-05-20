@@ -41,6 +41,7 @@
 -   [x] Git version management by `commitizen`
 -   [x] Docker-compose Deployment
 -   [x] Interfaces to generate SDK
+-   [x] User Scenario E2E Test
 
 ## Architecture
 
@@ -116,7 +117,7 @@ $ yarn mongo:run
 -   별도로 환경변수를 설정하지 않았다면, `./tools/mongo/.env.example` 을 기반으로 `./tools/mongo/.env` 파일이 자동 생성되며 컨테이너가 실행됩니다.
 -   DB name `event-reward`를 생성하고 접근 유저를 생성하는 `./tools/mongo/init/init-mongo.js` 파일이 전달되어 자동 실행됩니다.
 
-올바르게 실행되었다면 컨테이너들이 올라가 있으며, Mongo-Express 를 로컬 브라우저에서 접속할 수 있습니다. (http://localhost:8081)[http://localhost:8081]
+올바르게 실행되었다면 2개의 컨테이너가 실행됩니다. 또한, Mongo-Express 를 로컬 브라우저에서 접속할 수 있습니다. (http://localhost:8081)[http://localhost:8081]
 
 만약, Mongo DB에 직접 접근할 수 있는 Mongosh를 사용하고 싶은 경우 아래 명령어를 이용합니다:
 
@@ -185,6 +186,8 @@ $ docker network create event-reward-network
 
 ```bash
 $ yarn docker:compose
+# 소스코드 수정 발생 시
+$ yarn docker:compose:build
 ```
 
 올바르게 실행되었다면 3개의 컨테이너가 실행됩니다.

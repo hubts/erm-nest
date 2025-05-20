@@ -87,7 +87,6 @@ export class EventRpcHandler implements IEventService {
         @Payload() payload: [user: UserModel, eventId: string]
     ): Promise<void> {
         const [user, eventId] = payload;
-        console.log("user", user);
         await this.eventRewardRequestService.requestReward(user, eventId);
     }
 

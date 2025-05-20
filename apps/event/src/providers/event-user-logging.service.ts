@@ -62,7 +62,6 @@ export class EventUserLoggingService {
         if (fieldNames && fieldNames.length) {
             filter.fieldName = { $in: fieldNames };
         }
-        console.log("filter", filter);
 
         // Find
         const total = await this.eventUserLoggingRepo.count(filter);

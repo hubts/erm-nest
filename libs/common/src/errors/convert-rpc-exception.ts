@@ -3,6 +3,7 @@ import { HttpException, InternalServerErrorException } from "@nestjs/common";
 
 export function convertRpcException(error: unknown): HttpException {
     if (error instanceof RpcException) {
+        console.log("RPC Exception", error.getError());
         const payload = error.getError() as {
             statusCode: number;
             message: string;
